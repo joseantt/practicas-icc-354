@@ -1,0 +1,49 @@
+<form method="post" th:action="@{'/update-student/' + ${student.studentId}}" th:object="${student}">
+    <h3 class="text-lg font-bold">Editar estudiante</h3>
+    <label class="input input-bordered flex items-center text-gray-800 gap-2 mt-5">
+        Matrícula:
+        <input type="text"
+               class="grow tabular-nums focus:outline-none"
+               pattern="[0-9]{8}"
+               minlength="8"
+               maxlength="8"
+               title="Debe contener 8 dígitos"
+               required disabled/>
+    </label>
+    <label class="input input-bordered flex items-center gap-2 mt-2 text-gray-800">
+        Nombre:
+        <input type="text"
+               th:field="*{name}"
+               class="grow"
+               minlength="1"
+               required />
+    </label>
+    <label class="input input-bordered flex items-center text-gray-800 gap-2 mt-2">
+        Apellido:
+        <input type="text"
+               class="grow"
+               minlength="1"
+               th:field="*{lastName}"
+               required />
+    </label>
+    <label class="input input-bordered flex items-center text-gray-800 gap-2 mt-2">
+        Teléfono:
+        <input id="phoneNumber"
+               type="tel"
+               pattern="[0-9]{10}"
+               minlength="10"
+               maxlength="10"
+               class="grow tabular-nums focus:outline-none"
+               title="Debe contener 10 dígitos"
+               th:field="*{phoneNumber}"
+               required />
+    </label>
+    <div class="flex justify-center mt-5">
+        <button type="submit" class="btn btn-success">
+            Guardar cambios
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+            </svg>
+        </button>
+    </div>
+</form>
