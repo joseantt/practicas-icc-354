@@ -1,0 +1,28 @@
+package org.example.practica3.entities;
+
+import lombok.AllArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
+
+@AllArgsConstructor
+public class UserDetailsImpl implements UserDetails {
+    private final UserInfo userInfo;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of((GrantedAuthority) () -> userInfo.getRole().name());
+    }
+
+    @Override
+    public String getPassword() {
+        return userInfo.getPassword();
+    }
+
+    @Override
+    public String getUsername() {
+        return userInfo.getUsername();
+    }
+}
