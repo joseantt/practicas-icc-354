@@ -16,6 +16,8 @@ public class SecurityConfig extends VaadinWebSecurity {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/admin-panel/**").hasRole("ADMIN")
+        ).formLogin(
+                formLogin -> formLogin.successForwardUrl("/")
         );
         super.configure(http);
         setLoginView(http, LoginView.class);
