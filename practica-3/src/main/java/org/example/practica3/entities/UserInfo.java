@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,4 +26,7 @@ public class UserInfo implements Serializable {
     private String password;
 
     private String role;
+
+    @OneToMany(mappedBy = "userInfo", cascade = CascadeType.ALL)
+    private List<Project> projects;
 }
