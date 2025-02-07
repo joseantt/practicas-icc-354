@@ -2,7 +2,6 @@ package org.example.practica3.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.practica3.enums.Role;
 
 import java.io.Serializable;
 
@@ -25,6 +24,5 @@ public class UserInfo implements Serializable {
 
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    private String role;
 }
