@@ -10,7 +10,7 @@ import org.example.practica3.views.MainLayout;
 
 @PermitAll
 @Route(value = "project-management", layout = MainLayout.class)
-@PageTitle("Project management | MockupAPP")
+@PageTitle("Projects | MockupAPP")
 public class ProjectManagementView extends VerticalLayout {
     public ProjectManagementView() {
         TextField searchField = new TextField();

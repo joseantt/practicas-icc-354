@@ -12,7 +12,7 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 public class Drawer extends SideNav {
     public Drawer() {
         var homeItem = styledSideNavItem(
-                "Project Management", ProjectManagementView.class, LineAwesomeIcon.FOLDER_OPEN.create()
+                "Projects", ProjectManagementView.class, LineAwesomeIcon.FOLDER_OPEN.create()
         );
         var userManagementItem = styledSideNavItem(
                 "User Management", UserManagementView.class, LineAwesomeIcon.USERS_SOLID.create()
