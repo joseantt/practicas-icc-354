@@ -20,7 +20,7 @@ public class Header extends HorizontalLayout {
         setAlignItems(Alignment.CENTER);
         getStyle().setBackgroundColor("#f8f9fa").setPadding("10px");
 
-        var leftDiv = new Div(new DrawerToggle(), new AppTitle("20px"));
+        var leftDiv = new Div(new DrawerToggle());
         leftDiv.getStyle()
                 .set("display", "flex")
                 .set("align-items", "center")
