@@ -1,4 +1,4 @@
-package org.example.practica3.views.components;
+package org.example.practica3.views;
 
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -6,7 +6,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import org.example.practica3.views.MainLayout;
 
 @PermitAll
 @Route(value = "project-management", layout = MainLayout.class)

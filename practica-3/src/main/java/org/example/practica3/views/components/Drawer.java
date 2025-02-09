@@ -5,6 +5,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
+import org.example.practica3.views.ProjectManagementView;
 import org.example.practica3.views.UserManagementView;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
