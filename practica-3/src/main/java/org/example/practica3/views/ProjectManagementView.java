@@ -14,7 +14,11 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.example.practica3.entities.Project;
+import org.example.practica3.entities.UserDetailsImpl;
+import org.example.practica3.entities.UserInfo;
 import org.example.practica3.services.ProjectService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @PermitAll
 @Route(value = "project-management", layout = MainLayout.class)
@@ -135,6 +139,15 @@ public class ProjectManagementView extends VerticalLayout {
     }
 
     private void saveProject(Project project) {
+        // Obtener el usuario actual
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        UserInfo currentUser = userDetails.getUserInfo();
+
+        // Asignar el usuario al proyecto
+        project.setUserInfo(currentUser);
+
+        // Guardar el proyecto
         projectService.saveProject(project);
         updateList();
         Notification.show("Proyecto guardado correctamente");
@@ -147,8 +160,23 @@ public class ProjectManagementView extends VerticalLayout {
     }
 
     private void updateList() {
-        // Aquí deberías obtener el ID del usuario actual
-        // Por ahora usaremos un ID de ejemplo
-        grid.setItems(projectService.findByUserId(1L));
+        // Use Authentication to get the user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Check if the principal is of the correct type or convert it
+        Object principal = authentication.getPrincipal();
+        UserInfo currentUser;
+
+        if (principal instanceof UserDetailsImpl) {
+            // If it's UserDetailsImpl, you might need to extract UserInfo
+            currentUser = ((UserDetailsImpl) principal).getUserInfo();
+        } else if (principal instanceof UserInfo) {
+            currentUser = (UserInfo) principal;
+        } else {
+            throw new IllegalStateException("Unexpected principal type: " + principal.getClass());
+        }
+
+        System.out.println("Current user: " + currentUser.getUsername());
+        grid.setItems(projectService.findByUserId(currentUser.getId()));
     }
 }

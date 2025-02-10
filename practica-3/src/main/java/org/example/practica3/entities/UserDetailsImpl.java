@@ -16,7 +16,7 @@ public class UserDetailsImpl implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(userInfo.getRole()));
     }
-
+    public UserInfo getUserInfo() { return this.userInfo; }
     @Override
     public String getPassword() {
         return userInfo.getPassword();
