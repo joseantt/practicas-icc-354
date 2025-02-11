@@ -4,6 +4,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -42,7 +43,7 @@ public class ProjectManagementView extends VerticalLayout {
         configureProjectDialog();
 
         // Layout principal
-        H1 title = new H1("Gestión de Proyectos");
+        H3 title = new H3("Gestión de Proyectos");
         Button addButton = new Button("Nuevo Proyecto", new Icon(VaadinIcon.PLUS));
         addButton.addClickListener(e -> showProjectDialog(new Project()));
 
