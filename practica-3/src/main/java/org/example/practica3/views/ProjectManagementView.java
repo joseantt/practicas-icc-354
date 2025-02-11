@@ -8,11 +8,11 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import jakarta.annotation.security.PermitAll;
 import org.example.practica3.entities.Project;
 import org.example.practica3.entities.UserDetailsImpl;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @PermitAll
 @Route(value = "project-management", layout = MainLayout.class)
 @PageTitle("Projects | MockupAPP")
-public class ProjectManagementView extends VerticalLayout {
+public class ProjectManagementView extends VerticalLayout implements HasUrlParameter<String> {
     private final ProjectService projectService;
     private final Grid<Project> grid = new Grid<>(Project.class);
     private final TextField searchField = new TextField();
@@ -195,5 +195,17 @@ public class ProjectManagementView extends VerticalLayout {
         originalProjects = projectService.findByUserId(currentUser.getId());
         grid.setItems(originalProjects);
         //grid.setItems(projectService.findByUserId(currentUser.getId()));
+    }
+
+    @Override
+    public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
+        QueryParameters queryParameters = event.getLocation().getQueryParameters();
+        boolean mockupWasCreated = queryParameters.getParameters().containsKey("success");
+
+        if (mockupWasCreated) {
+            Notification notification = Notification.show("Mockup creado correctamente");
+            notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            notification.setPosition(Notification.Position.BOTTOM_END);
+        }
     }
 }

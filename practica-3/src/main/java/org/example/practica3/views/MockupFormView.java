@@ -7,6 +7,8 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -16,12 +18,9 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.RegexpValidator;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.example.practica3.entities.Header;
 import org.example.practica3.entities.Mockup;
@@ -37,7 +36,8 @@ import java.util.stream.Collectors;
 @Route(value = "project-management/:projectId/create-mockup", layout = MainLayout.class)
 @PageTitle("Create a Mockup | MockupAPP")
 public class MockupFormView extends VerticalLayout implements BeforeEnterObserver, LocaleChangeObserver {
-    private Long projectId;
+    private Project project;
+
     private final MockupService mockupService;
     private final ProjectService projectService;
 
@@ -110,6 +110,13 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
     private void setupComponents() {
         separator.getStyle().setMarginTop("10px");
         separator2.getStyle().setMarginTop("10px");
+
+        accessMethod.setLabel("Access method");
+        contentType.setLabel("Content type");
+        responseCode.setLabel("Response code");
+        responseTime.setLabel("Response time (seconds)");
+        responseTime.setHelperText("If empty, the response will be immediate");
+        expirationTime.setLabel("Expiration time");
 
         path.setPlaceholder(getTranslation("mockup.form.path.placeholder"));
         path.setHelperText(getTranslation("mockup.form.path.helper"));
@@ -198,7 +205,6 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
 
     private void saveMockup() {
         List<Header> headers = obtainHeaders();
-        Project project = projectService.findByProjectId(projectId).orElse(null);
         Mockup mockup = new Mockup();
         if(!binder.writeBeanIfValid(mockup) || project == null) {
             return;
@@ -212,7 +218,10 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
             header.setMockup(mockup);
         }
         mockupService.save(mockup);
-        UI.getCurrent().navigate(ProjectManagementView.class);
+
+        Map<String, List<String>> queryParams = new HashMap<>();
+        queryParams.put("success", Collections.singletonList(""));
+        UI.getCurrent().navigate(ProjectManagementView.class, new QueryParameters(queryParams));
     }
 
     private List<Header> obtainHeaders() {
@@ -225,6 +234,9 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
                     return new String[]{headerName.getValue(), headerValue.getValue()};
                 })
                 .forEach(pair -> {
+                    if (pair[0].isBlank() || pair[1].isBlank()) {
+                        return;
+                    }
                     var header = Header.builder()
                             .key(pair[0])
                             .value(pair[1])
@@ -239,6 +251,7 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
 
         binder.forField(name)
                 .asRequired(getTranslation("mockup.form.name.required"))
+                .withValidator(name -> !name.isBlank(), getTranslation("mockup.form.name.required"))
                 .bind(Mockup::getName, Mockup::setName);
         binder.forField(description)
                 .bind(Mockup::getDescription, Mockup::setDescription);
@@ -262,6 +275,7 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
                 .bind(Mockup::getExpirationTimeInHours, Mockup::setExpirationTimeInHours);
         binder.forField(responseBody)
                 .asRequired(getTranslation("mockup.form.response.body.required"))
+                .withValidator(body -> !body.isBlank(), getTranslation("mockup.form.response.body.required"))
                 .bind(Mockup::getBody, Mockup::setBody);
     }
 
@@ -296,11 +310,19 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         var projectIdParam = event.getRouteParameters().get("projectId");
-        if (projectIdParam.isEmpty()) {
+
+        if (projectIdParam.isEmpty())  {
+            UI.getCurrent().navigate(MainLayout.class);
+            event.rerouteTo(MainLayout.class);
+            return;
+        }
+        Optional<Project> project = projectService.findByProjectId(Long.parseLong(projectIdParam.get()));
+        if(project.isEmpty()) {
+            UI.getCurrent().navigate(MainLayout.class);
             event.rerouteTo(MainLayout.class);
             return;
         }
 
-        projectId = Long.parseLong(projectIdParam.get());
+        this.project = project.get();
     }
 }
