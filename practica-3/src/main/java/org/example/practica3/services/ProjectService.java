@@ -2,14 +2,12 @@ package org.example.practica3.services;
 
 import org.example.practica3.entities.Project;
 import org.example.practica3.repositories.ProjectRepository;
+import org.springframework.stereotype.Service;
 
-<<<<<<< Updated upstream
-=======
 import java.util.List;
 import java.util.Optional;
 
 @Service
->>>>>>> Stashed changes
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
@@ -18,10 +16,7 @@ public class ProjectService {
         this.projectRepository = projectRepository;
     }
 
-<<<<<<< Updated upstream
-    public Project fingByUserId(long id) {
-        return null;
-=======
+
     public Optional<Project> findByProjectId(long projectId) {
         return projectRepository.findById(projectId);
     }
@@ -36,6 +31,5 @@ public class ProjectService {
 
     public void saveProject(Project project) {
         projectRepository.save(project);
->>>>>>> Stashed changes
     }
 }
