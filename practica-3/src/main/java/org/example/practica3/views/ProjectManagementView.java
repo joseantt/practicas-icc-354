@@ -4,6 +4,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -20,6 +21,9 @@ import org.example.practica3.services.ProjectService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @PermitAll
 @Route(value = "project-management", layout = MainLayout.class)
 @PageTitle("Projects | MockupAPP")
@@ -28,6 +32,7 @@ public class ProjectManagementView extends VerticalLayout {
     private final Grid<Project> grid = new Grid<>(Project.class);
     private final TextField searchField = new TextField();
     private Dialog projectDialog;
+    private List<Project> originalProjects;
 
     public ProjectManagementView(ProjectService projectService) {
         this.projectService = projectService;
@@ -38,7 +43,7 @@ public class ProjectManagementView extends VerticalLayout {
         configureProjectDialog();
 
         // Layout principal
-        H1 title = new H1("Gestión de Proyectos");
+        H3 title = new H3("Gestión de Proyectos");
         Button addButton = new Button("Nuevo Proyecto", new Icon(VaadinIcon.PLUS));
         addButton.addClickListener(e -> showProjectDialog(new Project()));
 
@@ -81,7 +86,18 @@ public class ProjectManagementView extends VerticalLayout {
         searchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         searchField.setClearButtonVisible(true);
         searchField.addValueChangeListener(e -> {
-            // Implementar búsqueda cuando sea necesario
+            String searchTerm = e.getValue().toLowerCase();
+
+            if (searchTerm.isEmpty()) {
+                grid.setItems(originalProjects);
+            } else {
+                grid.setItems(
+                        originalProjects.stream()
+                                .filter(project ->
+                                        project.getName().toLowerCase().contains(searchTerm))
+                                .collect(Collectors.toList())
+                );
+            }
         });
     }
 
@@ -176,7 +192,8 @@ public class ProjectManagementView extends VerticalLayout {
             throw new IllegalStateException("Unexpected principal type: " + principal.getClass());
         }
 
-        System.out.println("Current user: " + currentUser.getUsername());
-        grid.setItems(projectService.findByUserId(currentUser.getId()));
+        originalProjects = projectService.findByUserId(currentUser.getId());
+        grid.setItems(originalProjects);
+        //grid.setItems(projectService.findByUserId(currentUser.getId()));
     }
 }
