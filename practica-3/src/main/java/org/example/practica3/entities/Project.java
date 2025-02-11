@@ -4,6 +4,8 @@ package org.example.practica3.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Data
 public class Project {
@@ -16,4 +18,7 @@ public class Project {
     @ManyToOne
     //@JoinColumn(name = "id")
     private UserInfo userInfo;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Mockup> mockups;
 }
