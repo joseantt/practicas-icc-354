@@ -20,6 +20,8 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
+import org.example.practica3.constants.Role;
 import org.example.practica3.entities.UserInfo;
 import org.example.practica3.services.UserInfoService;
 import org.example.practica3.views.components.StyledGrid;
@@ -27,7 +29,7 @@ import org.example.practica3.views.components.StyledGrid;
 import java.util.Arrays;
 import java.util.List;
 
-@PermitAll
+@RolesAllowed(Role.ADMIN)
 @Route(value = "admin-panel/user-management", layout = MainLayout.class)
 @PageTitle("User management | MockupAPP")
 public class UserManagementView extends VerticalLayout {
