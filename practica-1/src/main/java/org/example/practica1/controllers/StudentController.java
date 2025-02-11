@@ -23,6 +23,11 @@ public class StudentController {
 
     @PostMapping("/register-student")
     public String registerStudent(Student student) {
+        Student searchedStudent = studentRepository.findById(student.getStudentId()).orElse(null);
+        if (searchedStudent != null && searchedStudent.getStudentId().equals(student.getStudentId())) {
+            return "redirect:/";
+        }
+
         studentRepository.save(student);
         return "redirect:/";
     }
