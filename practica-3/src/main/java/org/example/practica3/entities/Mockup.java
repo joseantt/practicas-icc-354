@@ -35,7 +35,7 @@ public class Mockup implements Serializable {
     @OneToMany(mappedBy = "mockup", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Header> headers;
 
-    private int responseTimeInSecs;
+    private int responseTimeInSecs = 0;
 
     private int expirationTimeInHours;
 

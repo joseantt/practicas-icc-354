@@ -5,6 +5,7 @@ import org.example.practica3.repositories.ProjectRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProjectService {
@@ -12,6 +13,10 @@ public class ProjectService {
 
     public ProjectService(ProjectRepository projectRepository) {
         this.projectRepository = projectRepository;
+    }
+
+    public Optional<Project> findByProjectId(long projectId) {
+        return projectRepository.findById(projectId);
     }
 
     public List<Project> findByUserId(long userId) {
