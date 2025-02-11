@@ -20,6 +20,9 @@ import org.example.practica3.services.ProjectService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @PermitAll
 @Route(value = "project-management", layout = MainLayout.class)
 @PageTitle("Projects | MockupAPP")
@@ -28,6 +31,7 @@ public class ProjectManagementView extends VerticalLayout {
     private final Grid<Project> grid = new Grid<>(Project.class);
     private final TextField searchField = new TextField();
     private Dialog projectDialog;
+    private List<Project> originalProjects;
 
     public ProjectManagementView(ProjectService projectService) {
         this.projectService = projectService;
@@ -81,7 +85,18 @@ public class ProjectManagementView extends VerticalLayout {
         searchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         searchField.setClearButtonVisible(true);
         searchField.addValueChangeListener(e -> {
-            // Implementar búsqueda cuando sea necesario
+            String searchTerm = e.getValue().toLowerCase();
+
+            if (searchTerm.isEmpty()) {
+                grid.setItems(originalProjects);
+            } else {
+                grid.setItems(
+                        originalProjects.stream()
+                                .filter(project ->
+                                        project.getName().toLowerCase().contains(searchTerm))
+                                .collect(Collectors.toList())
+                );
+            }
         });
     }
 
@@ -176,7 +191,8 @@ public class ProjectManagementView extends VerticalLayout {
             throw new IllegalStateException("Unexpected principal type: " + principal.getClass());
         }
 
-        System.out.println("Current user: " + currentUser.getUsername());
-        grid.setItems(projectService.findByUserId(currentUser.getId()));
+        originalProjects = projectService.findByUserId(currentUser.getId());
+        grid.setItems(originalProjects);
+        //grid.setItems(projectService.findByUserId(currentUser.getId()));
     }
 }
