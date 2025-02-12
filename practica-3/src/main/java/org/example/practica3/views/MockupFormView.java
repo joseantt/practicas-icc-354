@@ -19,6 +19,8 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.RegexpValidator;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.i18n.LocaleChangeEvent;
+import com.vaadin.flow.i18n.LocaleChangeObserver;
 import jakarta.annotation.security.PermitAll;
 import org.example.practica3.entities.Header;
 import org.example.practica3.entities.Mockup;
@@ -34,7 +36,7 @@ import java.util.stream.Collectors;
 @PermitAll
 @Route(value = "project-management/:projectId/create-mockup", layout = MainLayout.class)
 @PageTitle("Create a Mockup | MockupAPP")
-public class MockupFormView extends VerticalLayout implements BeforeEnterObserver {
+public class MockupFormView extends VerticalLayout implements BeforeEnterObserver, LocaleChangeObserver {
     private Project project;
 
     private final MockupService mockupService;
@@ -43,19 +45,19 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
     private final FormLayout formLayout = new FormLayout();
     private final VerticalLayout headersContainer = new VerticalLayout();
 
-    private final TextField name = new TextField("Name");
-    private final TextArea description = new TextArea("Description");
-    private final TextField path = new TextField("Path");
-    private final Select<String> accessMethod = new Select<>();
-    private final Select<String> contentType = new Select<>();
-    private final Select<Integer> responseCode = new Select<>();
-    private final IntegerField responseTime = new IntegerField();
-    private final Select<Integer> expirationTime = new Select<>();
-    private final TextArea responseBody = new TextArea("Response body");
-    private final Button saveButton = new Button("Add this mockup");
-    private final Button addHeaderButton = new Button("Add header");
-    private final HorizontalLayout buttonLayout = new HorizontalLayout(addHeaderButton);
-    // Falta JWT
+    private H3 title;
+    private TextField name;
+    private TextArea description;
+    private TextField path;
+    private Select<String> accessMethod;
+    private Select<String> contentType;
+    private Select<Integer> responseCode;
+    private IntegerField responseTime;
+    private Select<Integer> expirationTime;
+    private TextArea responseBody;
+    private Button saveButton;
+    private Button addHeaderButton;
+    private final HorizontalLayout buttonLayout;
 
     private final Hr separator = new Hr();
     private final Hr separator2 = new Hr();
@@ -66,20 +68,47 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         this.mockupService = mockupService;
         this.projectService = projectService;
 
+        // Inicializar componentes
+        initializeComponents();
+        buttonLayout = new HorizontalLayout(addHeaderButton);
+
         setupComponents();
-        var title = new H3("Create a REST mockup");
+        createBinder();
+        setFieldSizes();
+
+        // Selector de idioma
+        Select<String> languageSelect = new Select<>();
+        languageSelect.setLabel(getTranslation("mockup.language"));
+        languageSelect.setItems("en", "es");
+        languageSelect.setValue(UI.getCurrent().getLocale().getLanguage());
+        languageSelect.addValueChangeListener(event -> {
+            UI.getCurrent().setLocale(new Locale(event.getValue()));
+        });
 
         formLayout.add(name, description, path, separator,
                 accessMethod, contentType, responseCode,
                 responseTime, separator2, buttonLayout,
                 headersContainer, responseBody, expirationTime, saveButton);
 
-        createBinder();
-        setFieldSizes();
-        add(title, formLayout);
+        add(languageSelect, title, formLayout);
     }
 
-    private void setupComponents(){
+    private void initializeComponents() {
+        title = new H3(getTranslation("mockup.form.title"));
+        name = new TextField(getTranslation("mockup.form.name"));
+        description = new TextArea(getTranslation("mockup.form.description"));
+        path = new TextField(getTranslation("mockup.form.path"));
+        accessMethod = new Select<>();
+        contentType = new Select<>();
+        responseCode = new Select<>();
+        responseTime = new IntegerField();
+        expirationTime = new Select<>();
+        responseBody = new TextArea(getTranslation("mockup.form.response.body"));
+        saveButton = new Button(getTranslation("mockup.form.save"));
+        addHeaderButton = new Button(getTranslation("mockup.form.add.header"));
+    }
+
+    private void setupComponents() {
         separator.getStyle().setMarginTop("10px");
         separator2.getStyle().setMarginTop("10px");
 
@@ -90,8 +119,8 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         responseTime.setHelperText("If empty, the response will be immediate");
         expirationTime.setLabel("Expiration time");
 
-        path.setPlaceholder("api/v1/example");
-        path.setHelperText("Path must not start with / and must not contain double slashes or whitespaces");
+        path.setPlaceholder(getTranslation("mockup.form.path.placeholder"));
+        path.setHelperText(getTranslation("mockup.form.path.helper"));
 
         accessMethod.setItems("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
         accessMethod.setValue("GET");
@@ -106,15 +135,7 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
                 statusCode + " - " + HttpStatus.resolve(statusCode).getReasonPhrase());
         responseCode.setValue(HttpStatus.OK.value());
 
-        Map<Integer, String> expirationOptions = new LinkedHashMap<>();
-        expirationOptions.put(1, "1 hour");
-        expirationOptions.put(24, "1 day");
-        expirationOptions.put(168, "1 week");
-        expirationOptions.put(720, "1 month");
-        expirationOptions.put(8760, "1 year");
-        expirationTime.setItems(expirationOptions.keySet());
-        expirationTime.setItemLabelGenerator(expirationOptions::get);
-        expirationTime.setValue(1);
+        setupExpirationTimes();
 
         saveButton.setIcon(VaadinIcon.CHECK_CIRCLE.create());
         saveButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_LARGE);
@@ -129,6 +150,18 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         addHeaderButton.addClickListener(e -> addNewFields());
     }
 
+    private void setupExpirationTimes() {
+        Map<Integer, String> expirationOptions = new LinkedHashMap<>();
+        expirationOptions.put(1, getTranslation("mockup.form.expiration.1hour"));
+        expirationOptions.put(24, getTranslation("mockup.form.expiration.1day"));
+        expirationOptions.put(168, getTranslation("mockup.form.expiration.1week"));
+        expirationOptions.put(720, getTranslation("mockup.form.expiration.1month"));
+        expirationOptions.put(8760, getTranslation("mockup.form.expiration.1year"));
+        expirationTime.setItems(expirationOptions.keySet());
+        expirationTime.setItemLabelGenerator(expirationOptions::get);
+        expirationTime.setValue(1);
+    }
+
     private void addNewFields() {
         FlexLayout fieldGroup = new FlexLayout();
         fieldGroup.setJustifyContentMode(JustifyContentMode.CENTER);
@@ -137,12 +170,12 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         fieldGroup.setFlexWrap(FlexLayout.FlexWrap.WRAP);
 
         var headerName = new TextField();
-        headerName.setPlaceholder("Name");
+        headerName.setPlaceholder(getTranslation("mockup.form.header.name.placeholder"));
         headerName.getStyle().setMarginRight("10px");
         headerName.setWidth("calc(40% - 20px)");
 
         var headerValue = new TextField();
-        headerValue.setPlaceholder("Value");
+        headerValue.setPlaceholder(getTranslation("mockup.form.header.value.placeholder"));
         headerValue.getStyle().setMarginRight("10px");
         headerValue.setWidth("calc(40% - 20px)");
 
@@ -171,7 +204,6 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         formLayout.setColspan(buttonLayout, 2);
     }
 
-    // DATA
     private void saveMockup() {
         List<Header> headers = obtainHeaders();
         Mockup mockup = new Mockup();
@@ -220,13 +252,16 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         String pathRegex = "^(?!\\/|.*\\/\\/)(?:[A-Za-z0-9\\-._~!$&'()*+,;=:@]|%(?:[0-9A-Fa-f]{2})|\\/(?!\\/))*$";
 
         binder.forField(name)
-                .asRequired("Name is required")
-                .withValidator(name -> !name.isBlank(), "Name is required")
+                .asRequired(getTranslation("mockup.form.name.required"))
+                .withValidator(name -> !name.isBlank(), getTranslation("mockup.form.name.required"))
                 .bind(Mockup::getName, Mockup::setName);
-        binder.forField(description).bind(Mockup::getDescription, Mockup::setDescription);
+        binder.forField(description)
+                .bind(Mockup::getDescription, Mockup::setDescription);
         binder.forField(path)
-                .asRequired("Path is required")
-                .withValidator(new RegexpValidator("Invalid path", pathRegex))
+                .asRequired(getTranslation("mockup.form.path.required"))
+                .withValidator(new RegexpValidator(
+                        getTranslation("mockup.form.path.invalid"),
+                        pathRegex))
                 .bind(Mockup::getPath, Mockup::setPath);
         binder.forField(accessMethod)
                 .asRequired()
@@ -240,9 +275,37 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         binder.forField(expirationTime)
                 .asRequired();
         binder.forField(responseBody)
-                .asRequired("Response body is required")
-                .withValidator(body -> !body.isBlank(), "Response body is required")
+                .asRequired(getTranslation("mockup.form.response.body.required"))
+                .withValidator(body -> !body.isBlank(), getTranslation("mockup.form.response.body.required"))
                 .bind(Mockup::getBody, Mockup::setBody);
+    }
+
+    @Override
+    public void localeChange(LocaleChangeEvent event) {
+        // Actualizar todas las etiquetas y textos cuando cambie el idioma
+        title.setText(getTranslation("mockup.form.title"));
+        name.setLabel(getTranslation("mockup.form.name"));
+        description.setLabel(getTranslation("mockup.form.description"));
+        path.setLabel(getTranslation("mockup.form.path"));
+        path.setPlaceholder(getTranslation("mockup.form.path.placeholder"));
+        path.setHelperText(getTranslation("mockup.form.path.helper"));
+
+        accessMethod.setLabel(getTranslation("mockup.form.access.method"));
+        contentType.setLabel(getTranslation("mockup.form.content.type"));
+        responseCode.setLabel(getTranslation("mockup.form.response.code"));
+        responseTime.setLabel(getTranslation("mockup.form.response.time"));
+        responseTime.setHelperText(getTranslation("mockup.form.response.time.helper"));
+        expirationTime.setLabel(getTranslation("mockup.form.expiration.time"));
+        responseBody.setLabel(getTranslation("mockup.form.response.body"));
+
+        saveButton.setText(getTranslation("mockup.form.save"));
+        addHeaderButton.setText(getTranslation("mockup.form.add.header"));
+
+        // Actualizar las opciones de tiempo de expiración
+        setupExpirationTimes();
+
+        // Re-validar el binder para actualizar los mensajes de error
+        binder.validate();
     }
 
     @Override
