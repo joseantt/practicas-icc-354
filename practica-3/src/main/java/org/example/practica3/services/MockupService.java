@@ -11,12 +11,19 @@ import java.util.Optional;
 public class MockupService {
 
     private final MockupRepository mockupRepository;
+    private final JwtService jwtService;
 
-    public MockupService(MockupRepository mockupRepository) {
+    public MockupService(MockupRepository mockupRepository, JwtService jwtService) {
         this.mockupRepository = mockupRepository;
+        this.jwtService = jwtService;
     }
 
     public Mockup save(Mockup mockup) {
+        if (mockup.isRequiresJwt()) {
+            mockup.setJwtToken(jwtService.generateToken(mockup));
+        } else {
+            mockup.setJwtToken(null);
+        }
         return mockupRepository.save(mockup);
     }
 
@@ -42,10 +49,21 @@ public class MockupService {
             mockup.setHeaders(mockupDetails.getHeaders());
             mockup.setResponseTimeInSecs(mockupDetails.getResponseTimeInSecs());
             mockup.setExpirationTime(mockupDetails.getExpirationTime());
+
+            mockup.setRequiresJwt(mockupDetails.isRequiresJwt());
+            if (mockup.isRequiresJwt()) {
+                mockup.setJwtToken(jwtService.generateToken(mockup));
+            } else {
+                mockup.setJwtToken(null);
+            }
+
             return mockupRepository.save(mockup);
         }).orElseThrow(() -> new RuntimeException("Mockup not found with id " + id));
     }
 
+    public Optional<Mockup> findByPath(String path) {
+        return mockupRepository.findByPath(path);
+    }
     public void deleteMockup(Long id) {
         mockupRepository.deleteById(id);
     }

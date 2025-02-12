@@ -47,4 +47,7 @@ public class Mockup implements Serializable {
     private Project project;
 
     // TODO: falta agregar JWT token
+    private String jwtToken;
+
+    private boolean requiresJwt = false;
 }
