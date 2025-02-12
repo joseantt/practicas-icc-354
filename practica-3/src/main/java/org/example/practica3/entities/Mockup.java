@@ -40,6 +40,8 @@ public class Mockup implements Serializable {
 
     private LocalDateTime expirationTime;
 
+    private int expirationTimeInHours;
+
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
