@@ -24,9 +24,7 @@ public class MockupService {
         return mockupRepository.findAll();
     }
 
-    public Optional<Mockup> getMockupById(Long id) {
-        return mockupRepository.findById(id);
-    }
+    public Optional<Mockup> getMockupById(Long id) { return mockupRepository.findByIdWithHeaders(id); }
 
     public Mockup getMockupByPathAndMethod(String path, String method) {
         return mockupRepository.findByPathAndAccessMethod(path, method);

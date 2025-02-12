@@ -34,10 +34,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @PermitAll
-@Route(value = "project-management/:projectId/create-mockup", layout = MainLayout.class)
-@PageTitle("Create a Mockup | MockupAPP")
+@Route(value = "project-management/:projectId/mockup/:mockupId?", layout = MainLayout.class)
+@PageTitle("Mockup Form | MockupAPP")
 public class MockupFormView extends VerticalLayout implements BeforeEnterObserver, LocaleChangeObserver {
     private Project project;
+    private Mockup mockup;
+    private boolean isEditMode = false;
 
     private final MockupService mockupService;
     private final ProjectService projectService;
@@ -68,7 +70,6 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         this.mockupService = mockupService;
         this.projectService = projectService;
 
-        // Inicializar componentes
         initializeComponents();
         buttonLayout = new HorizontalLayout(addHeaderButton);
 
@@ -76,7 +77,7 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         createBinder();
         setFieldSizes();
 
-        // Selector de idioma
+        // Language selector
         Select<String> languageSelect = new Select<>();
         languageSelect.setLabel(getTranslation("mockup.language"));
         languageSelect.setItems("en", "es");
@@ -94,7 +95,7 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
     }
 
     private void initializeComponents() {
-        title = new H3(getTranslation("mockup.form.title"));
+        title = new H3();
         name = new TextField(getTranslation("mockup.form.name"));
         description = new TextArea(getTranslation("mockup.form.description"));
         path = new TextField(getTranslation("mockup.form.path"));
@@ -104,7 +105,7 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         responseTime = new IntegerField();
         expirationTime = new Select<>();
         responseBody = new TextArea(getTranslation("mockup.form.response.body"));
-        saveButton = new Button(getTranslation("mockup.form.save"));
+        saveButton = new Button();
         addHeaderButton = new Button(getTranslation("mockup.form.add.header"));
     }
 
@@ -148,6 +149,9 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         addHeaderButton.getStyle().setMarginTop("10px").setMarginBottom("10px");
         addHeaderButton.setIcon(VaadinIcon.PLUS.create());
         addHeaderButton.addClickListener(e -> addNewFields());
+
+        // Disable expiration time in edit mode
+        expirationTime.setEnabled(!isEditMode);
     }
 
     private void setupExpirationTimes() {
@@ -163,6 +167,11 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
     }
 
     private void addNewFields() {
+        FlexLayout fieldGroup = createHeaderFields();
+        headersContainer.add(fieldGroup);
+    }
+
+    private FlexLayout createHeaderFields() {
         FlexLayout fieldGroup = new FlexLayout();
         fieldGroup.setJustifyContentMode(JustifyContentMode.CENTER);
         fieldGroup.setAlignItems(Alignment.CENTER);
@@ -184,7 +193,7 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         removeButton.addClickListener(e -> headersContainer.remove(fieldGroup));
 
         fieldGroup.add(headerName, headerValue, removeButton);
-        headersContainer.add(fieldGroup);
+        return fieldGroup;
     }
 
     private void setFieldSizes() {
@@ -206,7 +215,17 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
 
     private void saveMockup() {
         List<Header> headers = obtainHeaders();
-        Mockup mockup = new Mockup();
+
+        // If in edit mode, use existing mockup
+        if (isEditMode && mockup == null) {
+            return;
+        }
+
+        // If in create mode, create new mockup
+        if (!isEditMode) {
+            mockup = new Mockup();
+        }
+
         if(!binder.writeBeanIfValid(mockup) || project == null) {
             return;
         }
@@ -216,14 +235,40 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         mockup.setResponseTimeInSecs(responseTime.isEmpty() ? 0 : responseTime.getValue());
         mockup.setExpirationTime(LocalDateTime.now().plusHours(expirationTime.getValue()));
 
+        // In edit mode, keep the original expiration time
+        if (!isEditMode) {
+            mockup.setExpirationTimeInHours(expirationTime.getValue());
+        }
+
         for(Header header : headers) {
             header.setMockup(mockup);
         }
-        mockupService.save(mockup);
 
-        Map<String, List<String>> queryParams = new HashMap<>();
-        queryParams.put("success", Collections.singletonList(""));
-        UI.getCurrent().navigate(ProjectManagementView.class, new QueryParameters(queryParams));
+        try {
+            if (isEditMode) {
+                mockupService.updateMockup(mockup.getId(), mockup);
+                Notification.show(getTranslation("mockup.form.update.success"),
+                                3000, Notification.Position.TOP_CENTER)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            } else {
+                mockupService.save(mockup);
+                Notification.show(getTranslation("mockup.form.create.success"),
+                                3000, Notification.Position.TOP_CENTER)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            }
+
+            // Navigate back to mockup list
+            UI.getCurrent().navigate(
+                    MockupListView.class,
+                    new RouteParameters("projectId", String.valueOf(project.getId()))
+            );
+        } catch (Exception e) {
+            Notification.show(
+                    getTranslation("mockup.form.error") + ": " + e.getMessage(),
+                    3000,
+                    Notification.Position.TOP_CENTER
+            ).addThemeVariants(NotificationVariant.LUMO_ERROR);
+        }
     }
 
     private List<Header> obtainHeaders() {
@@ -231,8 +276,8 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         headersContainer.getChildren()
                 .map(FlexLayout.class::cast)
                 .map(headerGroup -> {
-                    var headerName = (TextField) headerGroup.getChildren().toArray()[0];
-                    var headerValue = (TextField) headerGroup.getChildren().toArray()[1];
+                    var headerName = (TextField) headerGroup.getComponentAt(0);
+                    var headerValue = (TextField) headerGroup.getComponentAt(1);
                     return new String[]{headerName.getValue(), headerValue.getValue()};
                 })
                 .forEach(pair -> {
@@ -272,18 +317,53 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         binder.forField(responseCode)
                 .asRequired()
                 .bind(Mockup::getResponseCode, Mockup::setResponseCode);
+
         binder.forField(expirationTime)
                 .asRequired();
+
         binder.forField(responseBody)
                 .asRequired(getTranslation("mockup.form.response.body.required"))
                 .withValidator(body -> !body.isBlank(), getTranslation("mockup.form.response.body.required"))
                 .bind(Mockup::getBody, Mockup::setBody);
     }
 
+    private void loadExistingMockup() {
+        // Load form data
+        binder.readBean(mockup);
+
+        // Load existing headers
+        headersContainer.removeAll();
+        mockup.getHeaders().forEach(header -> {
+            FlexLayout headerLayout = createHeaderFields();
+            TextField headerName = (TextField) headerLayout.getComponentAt(0);
+            TextField headerValue = (TextField) headerLayout.getComponentAt(1);
+            headerName.setValue(header.getKey());
+            headerValue.setValue(header.getValue());
+            headersContainer.add(headerLayout);
+        });
+
+        // Set other fields not in binder
+        responseTime.setValue(mockup.getResponseTimeInSecs());
+        if (isEditMode) {
+            expirationTime.setValue(mockup.getExpirationTimeInHours());
+            expirationTime.setEnabled(false);
+        }
+    }
+
+    private void updateUIForMode() {
+        if (isEditMode) {
+            title.setText(getTranslation("mockup.form.title.edit"));
+            saveButton.setText(getTranslation("mockup.form.save.edit"));
+        } else {
+            title.setText(getTranslation("mockup.form.title.create"));
+            saveButton.setText(getTranslation("mockup.form.save.create"));
+        }
+    }
+
     @Override
     public void localeChange(LocaleChangeEvent event) {
-        // Actualizar todas las etiquetas y textos cuando cambie el idioma
-        title.setText(getTranslation("mockup.form.title"));
+        // Update all labels and texts when language changes
+        updateUIForMode(); // Update title and save button text based on mode
         name.setLabel(getTranslation("mockup.form.name"));
         description.setLabel(getTranslation("mockup.form.description"));
         path.setLabel(getTranslation("mockup.form.path"));
@@ -298,32 +378,48 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         expirationTime.setLabel(getTranslation("mockup.form.expiration.time"));
         responseBody.setLabel(getTranslation("mockup.form.response.body"));
 
-        saveButton.setText(getTranslation("mockup.form.save"));
         addHeaderButton.setText(getTranslation("mockup.form.add.header"));
 
-        // Actualizar las opciones de tiempo de expiración
+        // Update expiration time options
         setupExpirationTimes();
 
-        // Re-validar el binder para actualizar los mensajes de error
+        // Re-validate the binder to update error messages
         binder.validate();
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         var projectIdParam = event.getRouteParameters().get("projectId");
+        var mockupIdParam = event.getRouteParameters().get("mockupId");
 
-        if (projectIdParam.isEmpty())  {
-            UI.getCurrent().navigate(MainLayout.class);
-            event.rerouteTo(MainLayout.class);
-            return;
-        }
-        Optional<Project> project = projectService.findByProjectId(Long.parseLong(projectIdParam.get()));
-        if(project.isEmpty()) {
-            UI.getCurrent().navigate(MainLayout.class);
+        if (projectIdParam.isEmpty()) {
             event.rerouteTo(MainLayout.class);
             return;
         }
 
-        this.project = project.get();
+        Optional<Project> projectOpt = projectService.findByProjectId(Long.parseLong(projectIdParam.get()));
+        if (projectOpt.isEmpty()) {
+            event.rerouteTo(MainLayout.class);
+            return;
+        }
+
+        this.project = projectOpt.get();
+
+        // Determine if we're in edit mode
+        if (mockupIdParam.isPresent()) {
+            isEditMode = true;
+            Optional<Mockup> mockupOpt = mockupService.getMockupById(Long.parseLong(mockupIdParam.get()));
+            if (mockupOpt.isEmpty()) {
+                event.rerouteTo(MainLayout.class);
+                return;
+            }
+
+            // Load the existing mockup
+            this.mockup = mockupOpt.get();
+            loadExistingMockup();
+        }
+
+        // Update UI elements based on mode
+        updateUIForMode();
     }
 }
