@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @NoArgsConstructor
@@ -37,7 +38,7 @@ public class Mockup implements Serializable {
 
     private int responseTimeInSecs = 0;
 
-    private int expirationTimeInHours;
+    private LocalDateTime expirationTime;
 
     @ManyToOne
     @JoinColumn(name = "project_id")

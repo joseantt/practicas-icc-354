@@ -28,6 +28,10 @@ public class MockupService {
         return mockupRepository.findById(id);
     }
 
+    public Mockup getMockupByPathAndMethod(String path, String method) {
+        return mockupRepository.findByPathAndAccessMethod(path, method);
+    }
+
     public Mockup updateMockup(Long id, Mockup mockupDetails) {
         return mockupRepository.findById(id).map(mockup -> {
             mockup.setName(mockupDetails.getName());
@@ -39,7 +43,7 @@ public class MockupService {
             mockup.setBody(mockupDetails.getBody());
             mockup.setHeaders(mockupDetails.getHeaders());
             mockup.setResponseTimeInSecs(mockupDetails.getResponseTimeInSecs());
-            mockup.setExpirationTimeInHours(mockupDetails.getExpirationTimeInHours());
+            mockup.setExpirationTime(mockupDetails.getExpirationTime());
             return mockupRepository.save(mockup);
         }).orElseThrow(() -> new RuntimeException("Mockup not found with id " + id));
     }
