@@ -29,6 +29,7 @@ import org.example.practica3.services.MockupService;
 import org.example.practica3.services.ProjectService;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -232,6 +233,7 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         mockup.setProject(project);
         mockup.setHeaders(headers);
         mockup.setResponseTimeInSecs(responseTime.isEmpty() ? 0 : responseTime.getValue());
+        mockup.setExpirationTime(LocalDateTime.now().plusHours(expirationTime.getValue()));
 
         // In edit mode, keep the original expiration time
         if (!isEditMode) {
@@ -315,6 +317,10 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
         binder.forField(responseCode)
                 .asRequired()
                 .bind(Mockup::getResponseCode, Mockup::setResponseCode);
+
+        binder.forField(expirationTime)
+                .asRequired();
+
         binder.forField(responseBody)
                 .asRequired(getTranslation("mockup.form.response.body.required"))
                 .withValidator(body -> !body.isBlank(), getTranslation("mockup.form.response.body.required"))
