@@ -3,6 +3,7 @@ package org.example.practica3.views;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
@@ -152,6 +153,15 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
 
         // Disable expiration time in edit mode
         expirationTime.setEnabled(!isEditMode);
+
+        Checkbox requireJwtCheck = new Checkbox("Requiere autenticación JWT");
+        requireJwtCheck.setValue(mockup != null && mockup.isRequiresJwt());
+
+        formLayout.add(requireJwtCheck);
+
+        // Actualizar el binder
+        binder.forField(requireJwtCheck)
+                .bind(Mockup::isRequiresJwt, Mockup::setRequiresJwt);
     }
 
     private void setupExpirationTimes() {
