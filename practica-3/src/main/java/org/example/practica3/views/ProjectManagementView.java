@@ -1,5 +1,6 @@
 package org.example.practica3.views;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
@@ -136,12 +137,27 @@ public class ProjectManagementView extends VerticalLayout implements HasUrlParam
         // Aquí irían los detalles del proyecto y sus endpoints
         VerticalLayout content = new VerticalLayout();
         content.add(new H1("Endpoints"));
-        content.add(new Button("Añadir Endpoint", new Icon(VaadinIcon.PLUS)));
+
+        // Botón para ver mockups
+        Button viewMockupsButton = new Button("Ver mockups", new Icon(VaadinIcon.LIST));
+        viewMockupsButton.addClickListener(e -> {
+            detailsDialog.close(); // Cerramos el diálogo antes de navegar
+            UI.getCurrent().navigate(
+                    MockupListView.class,
+                    new RouteParameters("projectId", String.valueOf(project.getId()))
+            );
+        });
+
+        Button addEndpointButton = new Button("Añadir Endpoint", new Icon(VaadinIcon.PLUS));
+
+        // Layout horizontal para los botones
+        HorizontalLayout buttonLayout = new HorizontalLayout(viewMockupsButton, addEndpointButton);
+        content.add(buttonLayout);
 
         // Placeholder para la lista de endpoints
-        Grid<Object> endpointsGrid = new Grid<>();
-        endpointsGrid.setHeight("200px");
-        content.add(endpointsGrid);
+        //Grid<Object> endpointsGrid = new Grid<>();
+        //endpointsGrid.setHeight("200px");
+        //content.add(endpointsGrid);
 
         Button deleteButton = new Button("Eliminar Proyecto", new Icon(VaadinIcon.TRASH));
         deleteButton.addClickListener(e -> {
