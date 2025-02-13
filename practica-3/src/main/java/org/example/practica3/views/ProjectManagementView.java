@@ -1,9 +1,13 @@
 package org.example.practica3.views;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
@@ -60,26 +64,96 @@ public class ProjectManagementView extends VerticalLayout implements HasUrlParam
     }
 
     private void configureGrid() {
-        grid.setSizeFull();
-        grid.setColumns("name");
-        grid.addColumn(project -> "0").setHeader("Endpoints");  // Placeholder para endpoints
+        grid.removeAllColumns();
 
-        // Columna de acciones
+        // Configuración general del grid
+        grid.getStyle()
+                .set("--lumo-space-xs", "0.25rem")
+                .set("--lumo-space-s", "0.5rem")
+                .set("--lumo-space-m", "0.75rem")
+                .set("--lumo-size-xs", "1.5rem")
+                .set("--lumo-size-s", "1.75rem")
+                .set("--lumo-row-padding-s", "0.25rem");
+
+        // Establecer tema compacto
+        grid.addThemeVariants(GridVariant.LUMO_COMPACT, GridVariant.LUMO_NO_BORDER);
+        grid.setAllRowsVisible(true);
+
+        // Columna de nombre más compacta
+        grid.addColumn(Project::getName)
+                .setHeader("Nombre")
+                .setFlexGrow(1);
+
+        // Columna de acciones más compacta
         grid.addComponentColumn(project -> {
-            HorizontalLayout actions = new HorizontalLayout();
+                    HorizontalLayout actions = new HorizontalLayout();
+                    actions.setSpacing(false);
+                    actions.setPadding(false);
+                    actions.setAlignItems(Alignment.CENTER);
 
-            Button editButton = new Button(new Icon(VaadinIcon.EDIT));
-            editButton.addClickListener(e -> showProjectDialog(project));
+                    Button viewMockupsButton = new Button(new Icon(VaadinIcon.LIST));
+                    viewMockupsButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_SUCCESS);
+                    viewMockupsButton.getElement().setAttribute("title", "Ver mockups");
+                    viewMockupsButton.addClickListener(e -> {
+                        UI.getCurrent().navigate(
+                                MockupListView.class,
+                                new RouteParameters("projectId", String.valueOf(project.getId()))
+                        );
+                    });
 
-            Button deleteButton = new Button(new Icon(VaadinIcon.TRASH));
-            deleteButton.addClickListener(e -> deleteProject(project));
+                    Button editButton = new Button(new Icon(VaadinIcon.EDIT));
+                    editButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_PRIMARY);
+                    editButton.getElement().setAttribute("title", "Editar");
+                    editButton.addClickListener(e -> showProjectDialog(project));
 
-            Button detailsButton = new Button(new Icon(VaadinIcon.EXTERNAL_LINK));
-            detailsButton.addClickListener(e -> showProjectDetails(project));
+                    Button deleteButton = new Button(new Icon(VaadinIcon.TRASH));
+                    deleteButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_ERROR);
+                    deleteButton.getElement().setAttribute("title", "Eliminar");
+                    deleteButton.addClickListener(e -> confirmDelete(project));
 
-            actions.add(editButton, detailsButton, deleteButton);
-            return actions;
-        }).setHeader("Acciones");
+                    // Configurar los botones para que sean más pequeños
+                    for (Component button : new Component[]{viewMockupsButton, editButton, deleteButton}) {
+                        button.getElement().getStyle()
+                                .set("min-width", "var(--lumo-size-xs)")
+                                .set("width", "var(--lumo-size-xs)")
+                                .set("height", "var(--lumo-size-xs)")
+                                .set("margin", "0")
+                                .set("padding", "0");
+                    }
+
+                    actions.add(viewMockupsButton, editButton, deleteButton);
+                    actions.getStyle()
+                            .set("gap", "0.25rem")
+                            .set("margin", "0")
+                            .set("padding", "0");
+                    return actions;
+                }).setHeader("Acciones")
+                .setWidth("130px")
+                .setFlexGrow(0)
+                .setTextAlign(ColumnTextAlign.CENTER);
+    }
+
+    private void confirmDelete(Project project) {
+        Dialog confirmDialog = new Dialog();
+        confirmDialog.setCloseOnEsc(false);
+        confirmDialog.setCloseOnOutsideClick(false);
+
+        VerticalLayout dialogLayout = new VerticalLayout();
+        dialogLayout.add("¿Está seguro que desea eliminar este proyecto?");
+
+        HorizontalLayout buttonLayout = new HorizontalLayout();
+        Button confirmButton = new Button("Eliminar", e -> {
+            deleteProject(project);
+            confirmDialog.close();
+        });
+        confirmButton.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_PRIMARY);
+
+        Button cancelButton = new Button("Cancelar", e -> confirmDialog.close());
+        buttonLayout.add(confirmButton, cancelButton);
+
+        dialogLayout.add(buttonLayout);
+        confirmDialog.add(dialogLayout);
+        confirmDialog.open();
     }
 
     private void configureSearchField() {
