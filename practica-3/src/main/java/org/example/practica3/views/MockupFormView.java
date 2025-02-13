@@ -329,7 +329,8 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
                 .bind(Mockup::getResponseCode, Mockup::setResponseCode);
 
         binder.forField(expirationTime)
-                .asRequired();
+                .asRequired()
+                .bind(Mockup::getExpirationTimeInHours, Mockup::setExpirationTimeInHours);
 
         binder.forField(responseBody)
                 .asRequired(getTranslation("mockup.form.response.body.required"))
