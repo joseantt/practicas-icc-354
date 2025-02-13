@@ -19,7 +19,6 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import org.example.practica3.constants.Role;
 import org.example.practica3.entities.UserInfo;
@@ -175,6 +174,8 @@ public class UserManagementView extends VerticalLayout {
     private void setupValidations(Binder<UserInfo> binder) {
         binder.forField(username)
                 .asRequired("Username is required")
+                .withValidator(username -> !username.contains(" "), "Username must not contain spaces")
+                .withValidator(username -> userInfoService.findByUsername(username) == null, "Username already exists")
                 .bind(UserInfo::getUsername, UserInfo::setUsername);
 
         binder.forField(password)
