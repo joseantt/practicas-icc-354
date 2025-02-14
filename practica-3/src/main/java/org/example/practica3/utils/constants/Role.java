@@ -1,4 +1,4 @@
-package org.example.practica3.constants;
+package org.example.practica3.utils.constants;
 
 public class Role {
     public static final String ADMIN = "ADMIN";

@@ -33,4 +33,8 @@ public class ProjectService {
     public Optional<Project> findByProjectIdWithMockups(Long id) { return projectRepository.findByIdWithMockups(id); }
 
     public List<Project> findByUserId(Long userId) { return projectRepository.findByUserIdWithMockups(userId); }
+
+    public List<Project> getAllProjects() {
+        return projectRepository.findAll();
+    }
 }

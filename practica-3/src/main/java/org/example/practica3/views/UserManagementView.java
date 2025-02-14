@@ -20,7 +20,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
-import org.example.practica3.constants.Role;
+import org.example.practica3.utils.constants.Role;
 import org.example.practica3.entities.UserInfo;
 import org.example.practica3.services.UserInfoService;
 import org.example.practica3.views.components.StyledGrid;

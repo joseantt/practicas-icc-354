@@ -21,8 +21,12 @@ import org.example.practica3.entities.Mockup;
 import org.example.practica3.entities.Project;
 import org.example.practica3.services.MockupService;
 import org.example.practica3.services.ProjectService;
+import org.example.practica3.utils.Validations;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
+
+import static org.example.practica3.utils.Validations.userCanEnter;
 
 @Route(value = "project-management/:projectId/mockups", layout = MainLayout.class)
 @PageTitle("Mockup List | MockupAPP")
@@ -197,16 +201,21 @@ public class MockupListView extends VerticalLayout implements BeforeEnterObserve
             event.rerouteTo(MainLayout.class);
             return;
         }
-
         Optional<Project> projectOpt = projectService.findByProjectIdWithMockups(Long.parseLong(projectIdParam.get()));
         if (projectOpt.isEmpty()) {
             event.rerouteTo(MainLayout.class);
             return;
         }
-
         this.project = projectOpt.get();
-        title.setText("Mockup List - Project: " + project.getName());
+
+        if(!userCanEnter(project)){
+            event.rerouteTo(MainLayout.class);
+            UI.getCurrent().navigate(MainLayout.class);
+            return;
+        }
 
         refreshGrid();
     }
+
+
 }

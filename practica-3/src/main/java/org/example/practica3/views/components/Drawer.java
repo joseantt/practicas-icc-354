@@ -2,11 +2,10 @@ package org.example.practica3.views.components;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
-import org.example.practica3.constants.Role;
+import org.example.practica3.utils.constants.Role;
 import org.example.practica3.views.ProjectManagementView;
 import org.example.practica3.views.UserManagementView;
 import org.springframework.security.core.context.SecurityContextHolder;

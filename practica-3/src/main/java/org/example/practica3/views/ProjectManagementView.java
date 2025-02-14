@@ -37,13 +37,13 @@ public class ProjectManagementView extends VerticalLayout implements HasUrlParam
     private final Grid<Project> grid = new Grid<>(Project.class);
     private final TextField searchField = new TextField();
     private Dialog projectDialog;
-    private List<Project> originalProjects;
+    private List<Project> projects;
+    private String actualUserRole;
 
     public ProjectManagementView(ProjectService projectService) {
         this.projectService = projectService;
 
         // Configuración inicial
-        configureGrid();
         configureSearchField();
         configureProjectDialog();
 
@@ -59,8 +59,6 @@ public class ProjectManagementView extends VerticalLayout implements HasUrlParam
         add(title, toolbar, grid);
         setSizeFull();
 
-        // Cargar datos iniciales
-        updateList();
     }
 
     private void configureGrid() {
@@ -83,6 +81,12 @@ public class ProjectManagementView extends VerticalLayout implements HasUrlParam
         grid.addColumn(Project::getName)
                 .setHeader("Nombre")
                 .setFlexGrow(1);
+
+        if(actualUserRole.equals("ROLE_ADMIN")) {
+            grid.addColumn(project -> project.getUserInfo().getUsername())
+                    .setHeader("Creator")
+                    .setFlexGrow(1);
+        }
 
         // Columna de acciones más compacta
         grid.addComponentColumn(project -> {
@@ -164,10 +168,10 @@ public class ProjectManagementView extends VerticalLayout implements HasUrlParam
             String searchTerm = e.getValue().toLowerCase();
 
             if (searchTerm.isEmpty()) {
-                grid.setItems(originalProjects);
+                grid.setItems(projects);
             } else {
                 grid.setItems(
-                        originalProjects.stream()
+                        projects.stream()
                                 .filter(project ->
                                         project.getName().toLowerCase().contains(searchTerm))
                                 .collect(Collectors.toList())
@@ -282,8 +286,10 @@ public class ProjectManagementView extends VerticalLayout implements HasUrlParam
             throw new IllegalStateException("Unexpected principal type: " + principal.getClass());
         }
 
-        originalProjects = projectService.findByUserId(currentUser.getId());
-        grid.setItems(originalProjects);
+        projects = actualUserRole.equals("ROLE_ADMIN") ? projectService.getAllProjects()
+                                                       : projectService.findByUserId(currentUser.getId());
+
+        grid.setItems(projects);
         //grid.setItems(projectService.findByUserId(currentUser.getId()));
     }
 
@@ -297,5 +303,11 @@ public class ProjectManagementView extends VerticalLayout implements HasUrlParam
             notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             notification.setPosition(Notification.Position.BOTTOM_END);
         }
+
+        var authContext = SecurityContextHolder.getContext().getAuthentication();
+        this.actualUserRole = authContext.getAuthorities().stream().findFirst().get().getAuthority();
+
+        configureGrid();
+        updateList();
     }
 }

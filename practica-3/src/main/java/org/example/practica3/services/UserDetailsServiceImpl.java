@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.example.practica3.entities.UserInfo;
-import org.example.practica3.constants.Role;
+import org.example.practica3.utils.constants.Role;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {

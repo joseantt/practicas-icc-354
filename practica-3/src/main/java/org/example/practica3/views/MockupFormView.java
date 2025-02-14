@@ -34,6 +34,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.example.practica3.utils.Validations.userCanEnter;
+
 @PermitAll
 @Route(value = "project-management/:projectId/mockup/:mockupId?", layout = MainLayout.class)
 @PageTitle("Mockup Form | MockupAPP")
@@ -407,14 +409,18 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
             event.rerouteTo(MainLayout.class);
             return;
         }
-
         Optional<Project> projectOpt = projectService.findByProjectId(Long.parseLong(projectIdParam.get()));
         if (projectOpt.isEmpty()) {
             event.rerouteTo(MainLayout.class);
             return;
         }
-
         this.project = projectOpt.get();
+
+        if(!userCanEnter(project)){
+            event.rerouteTo(MainLayout.class);
+            UI.getCurrent().navigate(MainLayout.class);
+            return;
+        }
 
         // Determine if we're in edit mode
         if (mockupIdParam.isPresent()) {
@@ -429,7 +435,6 @@ public class MockupFormView extends VerticalLayout implements BeforeEnterObserve
             this.mockup = mockupOpt.get();
             loadExistingMockup();
         }
-
         // Update UI elements based on mode
         updateUIForMode();
     }
