@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.4.2'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'com.vaadin' version '24.6.4'
+    id 'com.github.node-gradle.node' version '3.5.1'
 }
 
 group = 'org.example'
@@ -27,6 +28,17 @@ repositories {
 ext {
     set('vaadinVersion', "24.6.4")
 }
+
+vaadin {
+    nodeVersion = '16.14.0'
+    requireHomeNodeExec = true
+}
+
+node {
+    version = '16.14.0'
+    download = true
+}
+
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
