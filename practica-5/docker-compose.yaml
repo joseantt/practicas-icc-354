@@ -1,0 +1,63 @@
+version: '3'
+
+services:
+  activemq:
+    image: rmohr/activemq:5.15.9
+    ports:
+      - "61616:61616"  # OpenWire
+      - "8161:8161"    # Web Console
+    environment:
+      - ACTIVEMQ_ADMIN_LOGIN=admin
+      - ACTIVEMQ_ADMIN_PASSWORD=admin
+    volumes:
+      - activemq-data:/opt/activemq/data
+    networks:
+      - sensores-network
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    depends_on:
+      - activemq
+    volumes:
+      - server-data:/app/data
+      - server-logs:/app/logs
+    networks:
+      - sensores-network
+    environment:
+      - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemq:61616
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/app/data/sensoresdb
+
+  endpoint-simulator-1:
+    build:
+      context: ./endpoint-simulator
+      dockerfile: Dockerfile
+    depends_on:
+      - activemq
+    networks:
+      - sensores-network
+    environment:
+      - BROKER_URL=tcp://activemq:61616
+      - DEVICE_ID=1
+
+  endpoint-simulator-2:
+    build:
+      context: ./endpoint-simulator
+      dockerfile: Dockerfile
+    depends_on:
+      - activemq
+    networks:
+      - sensores-network
+    environment:
+      - BROKER_URL=tcp://activemq:61616
+      - DEVICE_ID=2
+
+networks:
+  sensores-network:
+    driver: bridge
+
+volumes:
+  activemq-data:
+  server-data:
+  server-logs:
