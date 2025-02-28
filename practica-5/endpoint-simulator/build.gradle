@@ -5,28 +5,26 @@ plugins {
 
 group = 'org.example'
 version = '1.0-SNAPSHOT'
+sourceCompatibility = '11'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    // ActiveMQ
+    implementation 'org.apache.activemq:activemq-client:5.16.3'
 
-    // ActiveMQ dependencies
-    implementation group: 'org.apache.activemq', name: 'activemq-client', version: '5.18.6'
+    // Jackson para JSON
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.0'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0'
 
-    // Slf4j dependencies
-    implementation 'org.apache.logging.log4j:log4j-api:2.23.1'
-    implementation 'org.apache.logging.log4j:log4j-core:2.23.1'
-    implementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.23.1'
+    // Logging
+    implementation 'org.slf4j:slf4j-api:1.7.32'
+    implementation 'ch.qos.logback:logback-classic:1.2.6'
 
-    // Jackson dependencies
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.15.2'
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
 application {
@@ -35,4 +33,22 @@ application {
 
 test {
     useJUnitPlatform()
+}
+
+// Tarea para crear un jar ejecutable con todas las dependencias
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'org.example.Main'
+    }
+    archiveBaseName = project.name + '-all'
+
+    // Establecer estrategia para archivos duplicados
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from {
+        configurations.runtimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    with jar
 }
