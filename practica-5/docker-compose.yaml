@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   activemq:
     image: rmohr/activemq:5.15.9
@@ -13,13 +11,20 @@ services:
       - activemq-data:/opt/activemq/data
     networks:
       - sensores-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8161"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   server:
     build:
       context: ./server
       dockerfile: Dockerfile
     depends_on:
-      - activemq
+      activemq:
+        condition: service_healthy
     volumes:
       - server-data:/app/data
       - server-logs:/app/logs
@@ -34,7 +39,8 @@ services:
       context: ./endpoint-simulator
       dockerfile: Dockerfile
     depends_on:
-      - activemq
+      activemq:
+        condition: service_healthy
     networks:
       - sensores-network
     environment:
@@ -46,7 +52,8 @@ services:
       context: ./endpoint-simulator
       dockerfile: Dockerfile
     depends_on:
-      - activemq
+      activemq:
+        condition: service_healthy
     networks:
       - sensores-network
     environment:
