@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 group = 'org.example'
@@ -51,4 +52,12 @@ task fatJar(type: Jar) {
         }
     }
     with jar
+}
+
+// ShadowJar
+shadowJar {
+    archiveBaseName = project.name + '-shadow'
+    archiveClassifier = ''
+    archiveVersion = ''
+    mainClassName = 'org.example.Main'
 }
