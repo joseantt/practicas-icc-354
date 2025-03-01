@@ -1,6 +1,7 @@
 package org.example.server.config;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.example.server.MensajeDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,8 @@ import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
 
 import jakarta.jms.ConnectionFactory;
+
+import java.util.Map;
 
 @Configuration
 @EnableJms
@@ -40,21 +43,20 @@ public class JmsConfig {
         MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
         converter.setTargetType(MessageType.TEXT);
         converter.setTypeIdPropertyName("_type");
+        converter.setTypeIdMappings(Map.of("Mensaje", MensajeDTO.class));
         return converter;
     }
 
     @Bean
     public JmsTemplate jmsTemplate() {
-        JmsTemplate template = new JmsTemplate(connectionFactory());
-        template.setMessageConverter(jacksonJmsMessageConverter());
-        return template;
+        return new JmsTemplate(connectionFactory());
     }
 
     @Bean
-    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
+    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(ConnectionFactory connectionFactory) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-        factory.setConnectionFactory(connectionFactory());
-        factory.setPubSubDomain(true); // Para temas (publicación/suscripción)
+        factory.setConnectionFactory(connectionFactory);
+        factory.setPubSubDomain(true);
         factory.setMessageConverter(jacksonJmsMessageConverter());
         return factory;
     }

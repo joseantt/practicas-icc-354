@@ -14,6 +14,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class SensorData {
 
+    SensorData(MensajeDTO mensaje) {
+        this.idDispositivo = mensaje.getIdDispositivo();
+        this.fechaGeneracion = mensaje.getFechaGeneracion();
+        this.temperatura = mensaje.getTemperatura();
+        this.humedad = mensaje.getHumedad();
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,7 +29,7 @@ public class SensorData {
     private Integer idDispositivo;
 
     @Column(name = "fecha_generacion")
-    private LocalDateTime fechaGeneracion;
+    private String fechaGeneracion;
 
     @Column(name = "temperatura")
     private Double temperatura;

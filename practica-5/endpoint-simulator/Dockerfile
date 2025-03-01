@@ -2,7 +2,7 @@ FROM gradle:8.4-jdk21 AS build
 
 WORKDIR /app
 COPY . /app/
-RUN gradle fatJar
+RUN gradle shadowJar
 
 FROM eclipse-temurin:21-jre
 

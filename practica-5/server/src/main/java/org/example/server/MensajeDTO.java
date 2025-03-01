@@ -1,18 +1,13 @@
 package org.example.server;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
-import java.time.LocalDateTime;
-
-public class Mensaje {
+public class MensajeDTO {
     @JsonProperty("idDispositivo")
     private int idDispositivo;
 
     @JsonProperty("fechaGeneracion")
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
-    private LocalDateTime fechaGeneracion;
+    private String fechaGeneracion;
 
     @JsonProperty("temperatura")
     private Double temperatura;
@@ -20,20 +15,13 @@ public class Mensaje {
     @JsonProperty("humedad")
     private Double humedad;
 
-    public Mensaje() {
+    public MensajeDTO() {
     }
 
-    public Mensaje(Double temperatura, Double humedad, int idDispositivo) {
-        this.fechaGeneracion = LocalDateTime.now();
-        this.temperatura = temperatura;
-        this.humedad = humedad;
-        this.idDispositivo = idDispositivo;
-    }
-
-    public LocalDateTime getFechaGeneracion() {
+    public String getFechaGeneracion() {
         return fechaGeneracion;
     }
-    public void setFechaGeneracion(LocalDateTime fechaGeneracion) {
+    public void setFechaGeneracion(String fechaGeneracion) {
         this.fechaGeneracion = fechaGeneracion;
     }
 

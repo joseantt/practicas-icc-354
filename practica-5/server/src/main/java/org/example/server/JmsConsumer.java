@@ -13,16 +13,11 @@ public class JmsConsumer {
     private final SensorDataRepository sensorDataRepository;
 
     @JmsListener(destination = "sensores.topic", containerFactory = "jmsListenerContainerFactory")
-    public void receiveMessage(Mensaje mensaje) {
+    public void receiveMessage(MensajeDTO mensajeDTO) {
         try {
-            log.info("Mensaje recibido: {}", mensaje);
+            log.info("Mensaje recibido: {}", mensajeDTO);
 
-            // Convertir Mensaje a SensorData y guardar en base de datos
-            SensorData sensorData = new SensorData();
-            sensorData.setIdDispositivo(mensaje.getIdDispositivo());
-            sensorData.setFechaGeneracion(mensaje.getFechaGeneracion());
-            sensorData.setTemperatura(mensaje.getTemperatura());
-            sensorData.setHumedad(mensaje.getHumedad());
+            SensorData sensorData = new SensorData(mensajeDTO);
 
             sensorDataRepository.save(sensorData);
             log.info("Datos del sensor guardados: {}", sensorData);

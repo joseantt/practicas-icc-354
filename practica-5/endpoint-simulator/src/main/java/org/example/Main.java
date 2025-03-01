@@ -6,10 +6,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.Connection;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-import javax.jms.Topic;
+import javax.jms.*;
 import java.util.Random;
 
 public class Main {
@@ -41,10 +38,9 @@ public class Main {
 
         while(true){
             try{
-                Mensaje mensaje = sensorDetectaInformacion();
-                String json = objectMapper.writeValueAsString(mensaje);
-                productor.send(session.createTextMessage(json));
-                logger.info("Mensaje enviado -> {}", json);
+                TextMessage textMessage = prepareTextMessage(sensorEmiteMensaje());
+                productor.send(textMessage);
+                logger.info("Mensaje enviado -> {}", textMessage.getText());
                 Thread.sleep(60000);
             } catch (Exception e) {
                 logger.error("Error al enviar el mensaje", e);
@@ -52,7 +48,7 @@ public class Main {
         }
     }
 
-    public static Mensaje sensorDetectaInformacion(){
+    private static Mensaje sensorEmiteMensaje(){
         Random random = new Random();
 
         double mediaTemperatura = 27.5;
@@ -64,5 +60,13 @@ public class Main {
         double humedad = mediaHumedad + desviacionEstandarHumedad * random.nextGaussian();
 
         return new Mensaje(temperatura, humedad, idDispositivo);
+    }
+
+    private static TextMessage prepareTextMessage(Mensaje mensaje) throws Exception {
+        String jsonMessage = objectMapper.writeValueAsString(mensaje);
+        TextMessage textMessage = session.createTextMessage(jsonMessage);
+        textMessage.setStringProperty("_type", "Mensaje");
+
+        return textMessage;
     }
 }
