@@ -1,7 +1,7 @@
 package org.example.server.config;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.example.server.MensajeDTO;
+import org.example.server.data.MensajeDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

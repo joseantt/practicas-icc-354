@@ -1,4 +1,4 @@
-package org.example.server;
+package org.example.server.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

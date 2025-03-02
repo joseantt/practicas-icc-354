@@ -1,11 +1,10 @@
-package org.example.server;
+package org.example.server.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "sensores_data")
@@ -14,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class SensorData {
 
-    SensorData(MensajeDTO mensaje) {
+    public SensorData(MensajeDTO mensaje) {
         this.idDispositivo = mensaje.getIdDispositivo();
         this.fechaGeneracion = mensaje.getFechaGeneracion();
         this.temperatura = mensaje.getTemperatura();

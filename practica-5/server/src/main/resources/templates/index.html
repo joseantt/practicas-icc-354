@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" class="h-full" data-theme="winter">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Sensores</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.24/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <script src="/js/ws-script.js"></script>
+</head>
+<body class="min-h-screen p-4 bg-base-200">
+<div class="container mx-auto h-full px-4">
+    <h1 class="text-4xl font-bold text-center mb-8 mt-3">Monitor de Sensores</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-[1400px] mx-auto">
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title justify-center font-bold">Sensor de Temperatura</h2>
+                <div class="h-[400px] flex justify-center">
+                    <canvas id="temperature-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title justify-center font-bold">Sensor de Humedad</h2>
+                <div class="h-[400px] flex justify-center">
+                    <canvas id="humidity-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

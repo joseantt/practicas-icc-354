@@ -163,3 +163,8 @@
 2025-03-01 15:10:23.240 [main] INFO  org.example.Main - Mensaje enviado -> {"idDispositivo":611704,"fechaGeneracion":"01/03/2025 15:10:23","temperatura":28.948733429697636,"humedad":52.61362126449133}
 2025-03-01 15:11:23.258 [main] INFO  org.example.Main - Mensaje enviado -> {"idDispositivo":611704,"fechaGeneracion":"01/03/2025 15:11:23","temperatura":27.157589816787798,"humedad":32.2112481616516}
 2025-03-01 15:12:23.269 [main] INFO  org.example.Main - Mensaje enviado -> {"idDispositivo":611704,"fechaGeneracion":"01/03/2025 15:12:23","temperatura":28.691312117892313,"humedad":39.87911036243562}
+2025-03-01 15:12:53.859 [main] INFO  org.example.Main - Conexión establecida con el broker ActiveMQ
+2025-03-01 15:12:53.942 [main] INFO  org.example.Main - Mensaje enviado -> {"idDispositivo":546382,"fechaGeneracion":"01/03/2025 15:12:53","temperatura":25.440664337478697,"humedad":33.612302967610546}
+2025-03-01 15:13:53.948 [main] INFO  org.example.Main - Mensaje enviado -> {"idDispositivo":546382,"fechaGeneracion":"01/03/2025 15:13:53","temperatura":18.670417509682416,"humedad":62.94070288340242}
+2025-03-01 15:14:53.965 [main] INFO  org.example.Main - Mensaje enviado -> {"idDispositivo":546382,"fechaGeneracion":"01/03/2025 15:14:53","temperatura":34.98194541380768,"humedad":61.77852247835782}
+2025-03-01 15:15:53.968 [main] INFO  org.example.Main - Mensaje enviado -> {"idDispositivo":546382,"fechaGeneracion":"01/03/2025 15:15:53","temperatura":19.818641269946596,"humedad":48.52840890006042}

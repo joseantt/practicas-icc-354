@@ -2,7 +2,11 @@ package org.example.server;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.server.data.MensajeDTO;
+import org.example.server.data.SensorData;
+import org.example.server.data.SensorDataRepository;
 import org.springframework.jms.annotation.JmsListener;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -11,6 +15,7 @@ import org.springframework.stereotype.Component;
 public class JmsConsumer {
 
     private final SensorDataRepository sensorDataRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @JmsListener(destination = "sensores.topic", containerFactory = "jmsListenerContainerFactory")
     public void receiveMessage(MensajeDTO mensajeDTO) {
@@ -18,8 +23,9 @@ public class JmsConsumer {
             log.info("Mensaje recibido: {}", mensajeDTO);
 
             SensorData sensorData = new SensorData(mensajeDTO);
-
             sensorDataRepository.save(sensorData);
+            messagingTemplate.convertAndSend("/topic/sensores", sensorData);
+
             log.info("Datos del sensor guardados: {}", sensorData);
 
         } catch (Exception e) {
