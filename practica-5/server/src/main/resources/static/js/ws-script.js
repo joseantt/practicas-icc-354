@@ -65,8 +65,8 @@ class SensorWebSocket {
         let humDataset = this.charts.humedad.data.datasets.find(ds => ds.label.includes(deviceLabel));
 
         if (!tempDataset) {
-            tempDataset = this.crearDataset(`Temperatura ${deviceLabel}`, data.idDispositivo, 'temperatura');
-            humDataset = this.crearDataset(`Humedad ${deviceLabel}`, data.idDispositivo, 'humedad');
+            tempDataset = this.crearDataset(`${deviceLabel}`, data.idDispositivo, 'temperatura');
+            humDataset = this.crearDataset(`${deviceLabel}`, data.idDispositivo, 'humedad');
             this.charts.temperatura.data.datasets.push(tempDataset);
             this.charts.humedad.data.datasets.push(humDataset);
         }
@@ -77,6 +77,7 @@ class SensorWebSocket {
 
             if (this.charts.temperatura.data.labels.length > 10) {
                 this.charts.temperatura.data.labels.shift();
+                this.charts.humedad.data.labels.shift();
                 this.charts.temperatura.data.datasets.forEach(ds => ds.data.shift());
                 this.charts.humedad.data.datasets.forEach(ds => ds.data.shift());
             }
