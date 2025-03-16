@@ -1,8 +1,6 @@
-// Archivo: src/services/api.js
-
 // URL base de la API de AWS Lambda
 // Nota: Deberás reemplazar esta URL con la URL de tu API Gateway de AWS
-const API_BASE_URL = 'https://run.mocky.io/v3/73ecf403-15f3-47d5-b428-86c558b62c4a  ';
+const API_BASE_URL = 'https://rd622gp8ti.execute-api.us-east-1.amazonaws.com/default/function';
 
 /**
  * Función para obtener las reservas activas (fechas no expiradas)
@@ -46,7 +44,7 @@ export const fetchPastReservations = async (startDate, endDate) => {
         const endDateTime = `${endDate}T23:59:59`;
 
         const response = await fetch(
-            `${API_BASE_URL}/reservations?beginDate=${beginDate}&endDate=${endDateTime}`
+            `${API_BASE_URL}?beginDate=${beginDate}&endDate=${endDateTime}`
         );
 
         if (!response.ok) {
@@ -86,7 +84,7 @@ export const createReservation = async (reservation) => {
             fecha: reservation.datetime,
         };
 
-        const response = await fetch(`${API_BASE_URL}/reservations`, {
+        const response = await fetch(`${API_BASE_URL}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -124,7 +122,7 @@ export const checkAvailability = async (date, lab) => {
         const endDate = `${date}T23:59:59`;
 
         const response = await fetch(
-            `${API_BASE_URL}/reservations?beginDate=${beginDate}&endDate=${endDate}`
+            `${API_BASE_URL}?beginDate=${beginDate}&endDate=${endDate}`
         );
 
         if (!response.ok) {
