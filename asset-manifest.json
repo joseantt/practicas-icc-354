@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/practicas-icc-354/practica7/static/css/main.5f957462.css",
-    "main.js": "/practicas-icc-354/practica7/static/js/main.e355bf64.js",
-    "static/js/453.01be1562.chunk.js": "/practicas-icc-354/practica7/static/js/453.01be1562.chunk.js",
-    "index.html": "/practicas-icc-354/practica7/index.html",
-    "main.5f957462.css.map": "/practicas-icc-354/practica7/static/css/main.5f957462.css.map",
-    "main.e355bf64.js.map": "/practicas-icc-354/practica7/static/js/main.e355bf64.js.map",
-    "453.01be1562.chunk.js.map": "/practicas-icc-354/practica7/static/js/453.01be1562.chunk.js.map"
+    "main.css": "/practicas-icc-354/static/css/main.5f957462.css",
+    "main.js": "/practicas-icc-354/static/js/main.449d4ee5.js",
+    "static/js/453.01be1562.chunk.js": "/practicas-icc-354/static/js/453.01be1562.chunk.js",
+    "index.html": "/practicas-icc-354/index.html",
+    "main.5f957462.css.map": "/practicas-icc-354/static/css/main.5f957462.css.map",
+    "main.449d4ee5.js.map": "/practicas-icc-354/static/js/main.449d4ee5.js.map",
+    "453.01be1562.chunk.js.map": "/practicas-icc-354/static/js/453.01be1562.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.5f957462.css",
-    "static/js/main.e355bf64.js"
+    "static/js/main.449d4ee5.js"
   ]
 }
