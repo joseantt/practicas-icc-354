@@ -1,0 +1,101 @@
+services:
+  mockup-web-service-1:
+    build: .
+    ports:
+      - "${APP_PORT_1:-8080}:${APP_PORT_1:-8080}"
+    environment:
+      APP_PORT: ${APP_PORT_1:-8080}
+      DB_USERNAME: ${DB_USERNAME:-sa}
+      DB_PASSWORD: ${DB_PASSWORD:-}
+      DB_CONNECTION_URL: jdbc:h2:tcp://h2-db:1521/practica-4-demjtav
+      DB_DRIVER: org.h2.Driver
+      DB_DIALECT: org.hibernate.dialect.H2Dialect
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    restart: always
+    depends_on:
+      redis:
+        condition: service_started
+      h2-db:
+        condition: service_healthy
+    networks:
+      - mockup-network
+
+  mockup-web-service-2:
+    build: .
+    ports:
+      - "${APP_PORT_2:-8081}:${APP_PORT_2:-8081}"
+    environment:
+      APP_PORT: ${APP_PORT_2:-8081}
+      DB_USERNAME: ${DB_USERNAME:-sa}
+      DB_PASSWORD: ${DB_PASSWORD:-}
+      DB_CONNECTION_URL: jdbc:h2:tcp://h2-db:1521/practica-4-demjtav
+      DB_DRIVER: org.h2.Driver
+      DB_DIALECT: org.hibernate.dialect.H2Dialect
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    restart: always
+    depends_on:
+      redis:
+         condition: service_started
+      h2-db:
+        condition: service_healthy
+    networks:
+      - mockup-network
+
+  mockup-web-service-3:
+    build: .
+    ports:
+      - "${APP_PORT_3:-8083}:${APP_PORT_3:-8083}"
+    environment:
+      APP_PORT: ${APP_PORT_3:-8083}
+      DB_USERNAME: ${DB_USERNAME:-sa}
+      DB_PASSWORD: ${DB_PASSWORD:-}
+      DB_CONNECTION_URL: jdbc:h2:tcp://h2-db:1521/practica-4-demjtav
+      DB_DRIVER: org.h2.Driver
+      DB_DIALECT: org.hibernate.dialect.H2Dialect
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    restart: always
+    depends_on:
+      redis:
+        condition: service_started
+      h2-db:
+        condition: service_healthy
+    networks:
+      - mockup-network
+
+  redis:
+    image: redis:7.4.2-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - mockup-network
+
+  h2-db:
+    image: oscarfonts/h2
+    ports:
+      - "${DB_APP_PORT:-8082}:${DB_APP_PORT:-8082}"
+    environment:
+      DB_APP_PORT: ${DB_APP_PORT:-8082}
+      H2_OPTIONS: "-tcp -tcpPort 1521 -web -webAllowOthers -webPort ${DB_APP_PORT:-8082} -ifNotExists"
+      LOCAL_VOLUME_PATH: ${LOCAL_VOLUME_PATH:-mockup_data}
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${DB_APP_PORT:-8082}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    volumes:
+      - ${LOCAL_VOLUME_PATH:-mockup_data}:/opt/h2-data
+    networks:
+      - mockup-network
+
+volumes:
+    mockup_data:
+      driver: local
+
+networks:
+  mockup-network:
+    driver: bridge
