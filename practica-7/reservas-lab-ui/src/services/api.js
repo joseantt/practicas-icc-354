@@ -1,6 +1,6 @@
 // URL base de la API de AWS Lambda
 // Nota: Deberás reemplazar esta URL con la URL de tu API Gateway de AWS
-const API_BASE_URL = 'https://rd622gp8ti.execute-api.us-east-1.amazonaws.com/default/function';
+const API_BASE_URL = 'https://u9kti59cqb.execute-api.us-east-1.amazonaws.com/default/function';
 
 /**
  * Función para obtener las reservas activas (fechas no expiradas)

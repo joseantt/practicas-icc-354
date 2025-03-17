@@ -4,7 +4,7 @@ const Header = ({ onAddReservation, onShowPastReservations }) => {
     return (
         <header className="header">
             <div className="header-title">
-                <img src="/logo-pucmm.png" alt="Logo PUCMM" height="40" />
+                <img src="/logo-pucmm.png" alt="Logo PUCMM" width="65" />
                 <h1>Reservas de Laboratorio - EICT</h1>
             </div>
             <div className="header-actions">
