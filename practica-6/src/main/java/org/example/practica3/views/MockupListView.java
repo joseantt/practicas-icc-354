@@ -24,6 +24,7 @@ import org.example.practica3.services.ProjectService;
 import org.example.practica3.utils.Validations;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 import static org.example.practica3.utils.Validations.userCanEnter;
@@ -31,10 +32,10 @@ import static org.example.practica3.utils.Validations.userCanEnter;
 @Route(value = "project-management/:projectId/mockups", layout = MainLayout.class)
 @PageTitle("Mockup List | MockupAPP")
 @PermitAll
-public class MockupListView extends VerticalLayout implements BeforeEnterObserver {
+public class MockupListView extends VerticalLayout implements BeforeEnterObserver, Serializable {
     private final Grid<Mockup> grid = new Grid<>(Mockup.class);
-    private final MockupService mockupService;
-    private final ProjectService projectService;
+    private final transient MockupService mockupService;
+    private final transient ProjectService projectService;
     private Project project;
     private final H3 title;
 

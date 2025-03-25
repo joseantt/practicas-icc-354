@@ -11,8 +11,10 @@ import org.example.practica3.views.UserManagementView;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
+import java.io.Serializable;
+
 @Tag("drawer")
-public class Drawer extends SideNav {
+public class Drawer extends SideNav implements Serializable {
     public Drawer() {
         var homeItem = styledSideNavItem(
                 "Projects", ProjectManagementView.class, LineAwesomeIcon.FOLDER_OPEN.create()

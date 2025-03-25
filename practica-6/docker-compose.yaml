@@ -1,6 +1,8 @@
 services:
   mockup-web-service-1:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "${APP_PORT_1:-8080}:${APP_PORT_1:-8080}"
     environment:
@@ -12,6 +14,12 @@ services:
       DB_DIALECT: org.hibernate.dialect.H2Dialect
       REDIS_HOST: redis
       REDIS_PORT: 6379
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:${APP_PORT_1:-8080}/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
     restart: always
     depends_on:
       redis:
@@ -22,9 +30,9 @@ services:
       - mockup-network
 
   mockup-web-service-2:
-    build: .
-    ports:
-      - "${APP_PORT_2:-8081}:${APP_PORT_2:-8081}"
+    build:
+        context: .
+        dockerfile: Dockerfile
     environment:
       APP_PORT: ${APP_PORT_2:-8081}
       DB_USERNAME: ${DB_USERNAME:-sa}
@@ -44,9 +52,9 @@ services:
       - mockup-network
 
   mockup-web-service-3:
-    build: .
-    ports:
-      - "${APP_PORT_3:-8083}:${APP_PORT_3:-8083}"
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       APP_PORT: ${APP_PORT_3:-8083}
       DB_USERNAME: ${DB_USERNAME:-sa}
@@ -89,6 +97,22 @@ services:
       start_period: 10s
     volumes:
       - ${LOCAL_VOLUME_PATH:-mockup_data}:/opt/h2-data
+    networks:
+      - mockup-network
+
+  ha-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile-haproxy
+    command: ["haproxy", "-f", "/usr/local/etc/haproxy/haproxy.cfg"]
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      redis:
+        condition: service_started
+      mockup-web-service-1:
+        condition: service_healthy
     networks:
       - mockup-network
 

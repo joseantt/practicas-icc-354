@@ -17,10 +17,12 @@ import org.example.practica3.views.components.AppTitle;
 import org.example.practica3.views.components.Drawer;
 import org.example.practica3.views.components.Header;
 
+import java.io.Serializable;
+
 @PermitAll
 @Route(value = "")
 @PageTitle("Home view | MockupAPP")
-public class MainLayout extends AppLayout {
+public class MainLayout extends AppLayout implements Serializable {
     public MainLayout(AuthenticationContext authenticationContext) {
         Div verticalSpace = new Div();
         verticalSpace.getStyle().set("height", "15px");

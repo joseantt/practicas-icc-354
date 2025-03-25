@@ -25,13 +25,14 @@ import org.example.practica3.entities.UserInfo;
 import org.example.practica3.services.UserInfoService;
 import org.example.practica3.views.components.StyledGrid;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
 @RolesAllowed(Role.ADMIN)
 @Route(value = "admin-panel/user-management", layout = MainLayout.class)
 @PageTitle("User management | MockupAPP")
-public class UserManagementView extends VerticalLayout {
+public class UserManagementView extends VerticalLayout implements Serializable {
     private final TextField username = new TextField("Username");
     private final PasswordField password = new PasswordField("Password");
     private final Select<String> role = new Select<>();

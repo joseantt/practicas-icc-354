@@ -42,11 +42,7 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'org.parttio:line-awesome:2.0.0'
-
-    // Session and Redis Dependencies
-    implementation("org.springframework.session:spring-session-data-redis")
-    implementation("org.springframework.boot:spring-boot-starter-data-redis")
-    implementation("io.lettuce:lettuce-core")
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     // JWT Dependencies
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'

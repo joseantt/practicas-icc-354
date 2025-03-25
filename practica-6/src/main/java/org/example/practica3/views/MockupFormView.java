@@ -30,6 +30,7 @@ import org.example.practica3.services.MockupService;
 import org.example.practica3.services.ProjectService;
 import org.springframework.http.HttpStatus;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,13 +40,13 @@ import static org.example.practica3.utils.Validations.userCanEnter;
 @PermitAll
 @Route(value = "project-management/:projectId/mockup/:mockupId?", layout = MainLayout.class)
 @PageTitle("Mockup Form | MockupAPP")
-public class MockupFormView extends VerticalLayout implements BeforeEnterObserver, LocaleChangeObserver {
+public class MockupFormView extends VerticalLayout implements BeforeEnterObserver, LocaleChangeObserver, Serializable {
     private Project project;
     private Mockup mockup;
     private boolean isEditMode = false;
 
-    private final MockupService mockupService;
-    private final ProjectService projectService;
+    private final transient MockupService mockupService;
+    private final transient ProjectService projectService;
 
     private final FormLayout formLayout = new FormLayout();
     private final VerticalLayout headersContainer = new VerticalLayout();

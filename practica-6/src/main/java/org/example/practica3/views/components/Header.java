@@ -12,8 +12,10 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 
+import java.io.Serializable;
+
 @Tag("header")
-public class Header extends HorizontalLayout {
+public class Header extends HorizontalLayout implements Serializable {
     public Header(AuthenticationContext authenticationContext) {
         setWidthFull();
         setPadding(true);

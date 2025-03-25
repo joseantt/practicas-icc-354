@@ -26,13 +26,14 @@ import org.example.practica3.services.ProjectService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @PermitAll
 @Route(value = "project-management", layout = MainLayout.class)
 @PageTitle("Projects | MockupAPP")
-public class ProjectManagementView extends VerticalLayout implements HasUrlParameter<String> {
+public class ProjectManagementView extends VerticalLayout implements HasUrlParameter<String>, Serializable {
     private final ProjectService projectService;
     private final Grid<Project> grid = new Grid<>(Project.class);
     private final TextField searchField = new TextField();

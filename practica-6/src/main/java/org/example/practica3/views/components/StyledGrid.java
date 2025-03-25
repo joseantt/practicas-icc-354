@@ -3,7 +3,9 @@ package org.example.practica3.views.components;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 
-public class StyledGrid<T> extends Grid<T> {
+import java.io.Serializable;
+
+public class StyledGrid<T> extends Grid<T> implements Serializable {
     public StyledGrid(Class<T> beanType, boolean autoCreateColumns) {
         super(beanType, autoCreateColumns);
         addThemeVariants(

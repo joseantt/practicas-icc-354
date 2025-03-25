@@ -7,8 +7,10 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.server.StreamResource;
 
+import java.io.Serializable;
+
 @Tag("app-title")
-public class AppTitle extends Div {
+public class AppTitle extends Div implements Serializable {
     public AppTitle(String size) {
         Div container = new Div();
         container.getStyle()

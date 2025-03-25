@@ -6,20 +6,20 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import org.example.practica3.views.components.AppTitle;
+
+import java.io.Serializable;
 
 @Route("login")
 @PageTitle("Login | MockupAPP")
 @AnonymousAllowed
-public class LoginView extends VerticalLayout implements BeforeEnterObserver {
+public class LoginView extends VerticalLayout implements BeforeEnterObserver, Serializable {
     private final LoginForm login = new LoginForm();
 
+    // Evita acceder a UI.getCurrent() en el constructor
     public LoginView() {
-        if (UI.getCurrent().getSession().getAttribute("authenticated") != null) {
-            UI.getCurrent().navigate(MainLayout.class);
-        }
-
         setSizeFull();
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
@@ -27,25 +27,31 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         login.setForgotPasswordButtonVisible(false);
         login.setAction("login");
 
-        // Check for error parameter in URL
-        Location location = UI.getCurrent().getInternals().getActiveViewLocation();
-        QueryParameters queryParameters = location.getQueryParameters();
-
-        if (queryParameters.getParameters().containsKey("error")) {
-            login.setError(true);
-            Notification.show("Invalid username or password",
-                            3000, Notification.Position.TOP_CENTER)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-        }
-
         add(new AppTitle("32px"), login);
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        // Mueve la lógica de autenticación aquí
+        if (VaadinSession.getCurrent().getAttribute("authenticated") != null) {
+            event.forwardTo("");  // Navega a la ruta principal
+            return;
+        }
+
+        // Manejo del error de login
         boolean containsError = event.getLocation().getQueryParameters().getParameters().containsKey("error");
         if (containsError) {
             login.setError(true);
+            // Notificación usando addAttachListener para evitar problemas de serialización
+            this.getElement().executeJs("setTimeout(() => $0._showErrorNotification(), 100)",
+                    getElement());
         }
+    }
+
+    // Método para mostrar la notificación
+    private void _showErrorNotification() {
+        Notification.show("Invalid username or password",
+                        3000, Notification.Position.TOP_CENTER)
+                .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 }
