@@ -3,6 +3,7 @@ package org.example.practica8.views;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -15,109 +16,183 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
+import lombok.NonNull;
 import org.example.practica8.entities.Event;
 import org.example.practica8.services.EventService;
-import org.vaadin.stefan.fullcalendar.Entry;
-import org.vaadin.stefan.fullcalendar.FullCalendar;
-import org.vaadin.stefan.fullcalendar.FullCalendarBuilder;
-import org.vaadin.stefan.fullcalendar.Timezone;
+import org.vaadin.stefan.fullcalendar.*;
+import org.vaadin.stefan.fullcalendar.dataprovider.AbstractEntryProvider;
+import org.vaadin.stefan.fullcalendar.dataprovider.EntryQuery;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 @Tag("calendar-view")
 public class CalendarView extends VerticalLayout {
     private final transient EventService eventService;
-
-    private final FullCalendar calendar = FullCalendarBuilder.create().build();
-
-    private final TextField title = new TextField("Title");
-    private final TextArea description = new TextArea("Description");
-    private final TimePicker startDate = new TimePicker("From");
-    private final TimePicker endDate = new TimePicker("To");
+    private final FullCalendar calendar;
     private final Binder<Event> binder = new Binder<>(Event.class);
+
+    private TextField title;
+    private TextArea description;
+    private TimePicker startTime;
+    private TimePicker endTime;
+    private DatePicker startDate;
+    private DatePicker endDate;
 
     public CalendarView(EventService eventService) {
         this.eventService = eventService;
 
+        calendar = FullCalendarBuilder.create().build();
+        configureCalendar();
+        initializeFormFields();
+
         setSizeFull();
+        add(calendar);
+        setFlexGrow(1, calendar);
+    }
+
+    private void configureCalendar() {
         calendar.setSizeFull();
         calendar.setTimeslotsSelectable(true);
         calendar.setLocale(Locale.US);
         calendar.setTimezone(Timezone.getSystem());
-        add(calendar);
-        setFlexGrow(1, calendar);
-
-        setupListenerAddEventDialog();
+        calendar.addTimeslotsSelectedListener(this::showEventDialog);
+        calendar.setPrefetchEnabled(true);
+        calendar.setEntryProvider(new BackendEntryProvider(eventService));
     }
 
     private void addEventToCalendar(Event event) {
-        Entry entry = new Entry();
+        Entry entry = new Entry(String.valueOf(event.getId()));
         entry.setTitle(event.getTitle());
+        entry.setDescription(event.getDescription());
         entry.setStart(event.getStartDate());
         entry.setEnd(event.getEndDate());
-        calendar.getEntryProvider().asInMemory().addEntries(entry);
-        calendar.getEntryProvider().refreshItem(entry);
+        calendar.getEntryProvider().refreshAll();
     }
 
-    private void setupListenerAddEventDialog(){
-        calendar.addTimeslotsSelectedListener(slot -> {
-            Dialog dialog = new Dialog("Register new event");
-            FormLayout formLayout = new FormLayout();
+    private void showEventDialog(TimeslotsSelectedEvent slot) {
+        LocalDate selectedDate = slot.getStart().toLocalDate();
 
-            setupFields(slot.getStart().toLocalDate());
-            formLayout.add(title, description, startDate, endDate);
-            formLayout.setColspan(title, 2);
-            formLayout.setColspan(description, 2);
+        Dialog dialog = new Dialog("Register new event");
+        dialog.setCloseOnEsc(true);
+        dialog.setCloseOnOutsideClick(false);
 
-            Button saveButton = new Button("Save", click -> saveEvent(dialog));
-            saveButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_PRIMARY);
-            saveButton.setIcon(VaadinIcon.CHECK.create());
-            saveButton.setIconAfterText(true);
+        startDate.setValue(selectedDate);
+        endDate.setValue(selectedDate);
 
-            Button cancelButton = new Button("Cancel", e -> dialog.close());
+        FormLayout formLayout = createFormLayout();
+        HorizontalLayout buttonLayout = createButtonLayout(dialog);
 
-            HorizontalLayout buttonLayout = new HorizontalLayout(cancelButton, saveButton);
-            buttonLayout.getStyle().set("margin-top", "10px");
-            buttonLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-
-            dialog.add(formLayout, buttonLayout);
-            dialog.open();
-        });
+        dialog.add(formLayout, buttonLayout);
+        dialog.open();
     }
 
-    private void setupFields(LocalDate date) {
+    private void initializeFormFields() {
+        title = new TextField("Title");
+        description = new TextArea("Description");
+        startDate = new DatePicker("From");
+        startTime = new TimePicker("Start time");
+        endDate = new DatePicker("To");
+        endTime = new TimePicker("End time");
+
         description.setMaxRows(4);
-        startDate.setValue(LocalTime.now());
-        endDate.setValue(LocalTime.now().plusHours(1));
+        configureBindings();
+    }
 
+    private FormLayout createFormLayout() {
+        FormLayout formLayout = new FormLayout();
+        formLayout.add(
+                title,
+                description,
+                startDate, startTime,
+                endDate, endTime
+        );
+        formLayout.setColspan(title, 2);
+        formLayout.setColspan(description, 2);
+        return formLayout;
+    }
+
+    private HorizontalLayout createButtonLayout(Dialog dialog) {
+        Button saveButton = new Button("Save", click -> saveEvent(dialog));
+        saveButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_PRIMARY);
+        saveButton.setIcon(VaadinIcon.CHECK.create());
+        saveButton.setIconAfterText(true);
+
+        Button cancelButton = new Button("Cancel", click -> dialog.close());
+
+        HorizontalLayout buttonLayout = new HorizontalLayout(cancelButton, saveButton);
+        buttonLayout.getStyle().set("margin-top", "10px");
+        buttonLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+
+        return buttonLayout;
+    }
+
+    private void configureBindings() {
         binder.forField(title)
                 .asRequired("Title is required")
                 .bind(Event::getTitle, Event::setTitle);
+
         binder.forField(description)
                 .bind(Event::getDescription, Event::setDescription);
+
         binder.forField(startDate)
-                .asRequired("Start time is required")
-                .bind(event -> LocalTime.now(), (event, time) ->
-                    event.setStartDate(LocalDateTime.of(date, time))
+                .asRequired("Start date is required")
+                .bind(
+                        event -> event.getStartDate() != null ? event.getStartDate().toLocalDate() : null,
+                        (event, date) -> {
+                            LocalTime time = Optional.ofNullable(startTime.getValue())
+                                    .orElse(LocalTime.now());
+                            event.setStartDate(LocalDateTime.of(date, time));
+                        }
                 );
+
+        binder.forField(startTime)
+                .asRequired("Start time is required")
+                .bind(
+                        event -> event.getStartDate() != null ? event.getStartDate().toLocalTime() : null,
+                        (event, time) -> {
+                            LocalDate date = Optional.ofNullable(startDate.getValue())
+                                    .orElse(LocalDate.now());
+                            event.setStartDate(LocalDateTime.of(date, time));
+                        }
+                );
+
         binder.forField(endDate)
+                .asRequired("End date is required")
+                .bind(
+                        event -> event.getEndDate() != null ? event.getEndDate().toLocalDate() : null,
+                        (event, date) -> {
+                            LocalTime time = Optional.ofNullable(endTime.getValue())
+                                    .orElse(LocalTime.now());
+                            event.setEndDate(LocalDateTime.of(date, time));
+                        }
+                );
+
+        binder.forField(endTime)
                 .asRequired("End time is required")
-                .bind(event -> LocalTime.now(), (event, time) ->
-                    event.setEndDate(LocalDateTime.of(date, time))
+                .bind(
+                        event -> event.getEndDate() != null ? event.getEndDate().toLocalTime() : null,
+                        (event, time) -> {
+                            LocalDate date = Optional.ofNullable(endDate.getValue())
+                                    .orElse(LocalDate.now());
+                            event.setEndDate(LocalDateTime.of(date, time));
+                        }
                 );
     }
 
-    private void saveEvent(Dialog dialog){
+    private void saveEvent(Dialog dialog) {
         Event event = new Event();
 
         if (!binder.writeBeanIfValid(event)) {
-            binder.validate();
             return;
         }
 
+        // TODO: Validar que no se cree un evento con la misma fecha y hora
+        event.setUsername(""); // TODO: Set username from session
         eventService.saveEvent(event);
         addEventToCalendar(event);
 
@@ -125,5 +200,23 @@ public class CalendarView extends VerticalLayout {
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         dialog.close();
         binder.readBean(null);
+    }
+
+    private static class BackendEntryProvider extends AbstractEntryProvider<Entry> {
+        private final EventService service;
+
+        public BackendEntryProvider(EventService service) {
+            this.service = service;
+        }
+
+        @Override
+        public Stream<Entry> fetch(@NonNull EntryQuery query) {
+            return service.streamEntries(query);
+        }
+
+        @Override
+        public Optional<Entry> fetchById(@NonNull String id) {
+            return service.getEntry(id);
+        }
     }
 }
