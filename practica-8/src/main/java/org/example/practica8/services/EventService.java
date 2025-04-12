@@ -30,6 +30,10 @@ public class EventService {
         return eventRepository.findByUsername(username);
     }
 
+    public Event getEventById(Long id) {
+        return eventRepository.findById(id).orElse(null);
+    }
+
     public Stream<Entry> streamEntries(EntryQuery query) {
         return eventRepository
                 .findEventsWithinRange(query.getStart(), query.getEnd())
@@ -42,7 +46,7 @@ public class EventService {
     }
 
     private Entry convertEventToEntry(Event event) {
-        Entry entry = new Entry();
+        Entry entry = new Entry(event.getId().toString());
         entry.setTitle(event.getTitle());
         entry.setDescription(event.getDescription());
         entry.setStart(event.getStartDate());
