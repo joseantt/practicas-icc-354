@@ -16,6 +16,9 @@ import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
 import org.example.practica8.entities.Event;
 import org.example.practica8.services.EventService;
+import org.example.practica8.services.UserInfoService;
+import org.example.practica8.views.components.CrudDialogButtons;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.vaadin.stefan.fullcalendar.Entry;
 
 import java.time.LocalDate;
@@ -26,7 +29,9 @@ import java.util.function.Consumer;
 
 public class EventDialog {
     private final EventService eventService;
+    private final UserInfoService userInfoService;
     private final Consumer<Event> eventSavedCallback;
+
     private final Binder<Event> binder;
     private final Dialog dialog;
     private final TextField title;
@@ -38,12 +43,13 @@ public class EventDialog {
 
     private Event currentEvent;
 
-    public EventDialog(EventService eventService, Consumer<Event> eventSavedCallback) {
+    public EventDialog(EventService eventService, UserInfoService userInfoService, Consumer<Event> eventSavedCallback) {
         this.eventService = eventService;
+        this.userInfoService = userInfoService;
         this.eventSavedCallback = eventSavedCallback;
 
         binder = new Binder<>(Event.class);
-        dialog = new Dialog();
+        dialog = new Dialog("Register event");
         dialog.setCloseOnEsc(true);
         dialog.setCloseOnOutsideClick(false);
 
@@ -59,7 +65,7 @@ public class EventDialog {
         configureBindings();
 
         FormLayout formLayout = createFormLayout();
-        HorizontalLayout buttonLayout = createButtonLayout();
+        HorizontalLayout buttonLayout = new CrudDialogButtons(this::saveEvent, dialog);
 
         dialog.add(formLayout, buttonLayout);
     }
@@ -92,21 +98,6 @@ public class EventDialog {
         return formLayout;
     }
 
-    private HorizontalLayout createButtonLayout() {
-        Button saveButton = new Button("Save", click -> saveEvent());
-        saveButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_PRIMARY);
-        saveButton.setIcon(VaadinIcon.CHECK.create());
-        saveButton.setIconAfterText(true);
-
-        Button cancelButton = new Button("Cancel", click -> dialog.close());
-
-        HorizontalLayout buttonLayout = new HorizontalLayout(cancelButton, saveButton);
-        buttonLayout.getStyle().set("margin-top", "10px");
-        buttonLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-
-        return buttonLayout;
-    }
-
     private void setEvent(Entry entry) {
         Event event = eventService.getEventById(Long.valueOf(entry.getId()));
         currentEvent = event;
@@ -122,13 +113,14 @@ public class EventDialog {
     private void saveEvent() {
         boolean isNew = currentEvent == null;
 
-        if (currentEvent == null){
+        if (isNew) {
+            String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+
             currentEvent = new Event();
+            currentEvent.setOwner(userInfoService.findByEmail(currentUserEmail));
         }
 
-        if (!binder.writeBeanIfValid(currentEvent)) {
-            return;
-        }
+        if (!binder.writeBeanIfValid(currentEvent)) return;
 
         eventService.saveEvent(currentEvent);
         eventSavedCallback.accept(currentEvent);

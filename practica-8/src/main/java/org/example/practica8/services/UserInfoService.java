@@ -18,7 +18,10 @@ public class UserInfoService {
     }
 
     public void save(UserInfo userInfo) {
-        userInfo.setPassword(encoder.encode(userInfo.getPassword()));
+        if(!passwordImplementsBCrypt(userInfo.getPassword())) {
+            userInfo.setPassword(encoder.encode(userInfo.getPassword()));
+        }
+
         userInfoRepository.save(userInfo);
     }
 
@@ -44,5 +47,12 @@ public class UserInfoService {
 
     public long count() {
         return userInfoRepository.count();
+    }
+
+    private boolean passwordImplementsBCrypt(String password) {
+        return password != null &&
+                (password.startsWith("$2a$") ||
+                        password.startsWith("$2b$") ||
+                        password.startsWith("$2y$"));
     }
 }

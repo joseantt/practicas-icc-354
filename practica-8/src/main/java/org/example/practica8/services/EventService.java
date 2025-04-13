@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.vaadin.stefan.fullcalendar.Entry;
 import org.vaadin.stefan.fullcalendar.dataprovider.EntryQuery;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -28,6 +29,10 @@ public class EventService {
 
     public Event getEventById(Long id) {
         return eventRepository.findById(id).orElse(null);
+    }
+
+    public List<Event> getEventsWithinRange(LocalDateTime start, LocalDateTime end) {
+        return eventRepository.findEventsWithinRange(start, end);
     }
 
     public Stream<Entry> streamEntries(EntryQuery query) {

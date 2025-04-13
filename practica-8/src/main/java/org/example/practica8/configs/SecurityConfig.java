@@ -1,7 +1,7 @@
 package org.example.practica8.configs;
 
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
-import org.example.practica8.views.login.LoginView;
+import org.example.practica8.views.user.LoginView;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;

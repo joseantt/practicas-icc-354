@@ -5,6 +5,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import lombok.NonNull;
 import org.example.practica8.entities.Event;
 import org.example.practica8.services.EventService;
+import org.example.practica8.services.UserInfoService;
 import org.vaadin.stefan.fullcalendar.*;
 import org.vaadin.stefan.fullcalendar.dataprovider.AbstractEntryProvider;
 import org.vaadin.stefan.fullcalendar.dataprovider.EntryQuery;
@@ -17,10 +18,12 @@ import java.util.stream.Stream;
 @Tag("calendar-view")
 public class CalendarView extends VerticalLayout {
     private final transient EventService eventService;
+    private final transient UserInfoService userInfoService;
     private final FullCalendar calendar;
 
-    public CalendarView(EventService eventService) {
+    public CalendarView(EventService eventService, UserInfoService userInfoService) {
         this.eventService = eventService;
+        this.userInfoService = userInfoService;
 
         calendar = FullCalendarBuilder.create().build();
         configureCalendar();
@@ -42,7 +45,7 @@ public class CalendarView extends VerticalLayout {
     }
 
     private void showUpdateEventDialog(EntryClickedEvent entryClickedEvent) {
-        EventDialog eventDialog = new EventDialog(eventService, this::addEventToCalendar);
+        EventDialog eventDialog = new EventDialog(eventService, userInfoService, this::addEventToCalendar);
         eventDialog.open(null, entryClickedEvent.getEntry());
     }
 
@@ -57,7 +60,7 @@ public class CalendarView extends VerticalLayout {
 
     private void showCreateEventDialog(TimeslotsSelectedEvent slot) {
         LocalDate selectedDate = slot.getStart().toLocalDate();
-        EventDialog eventDialog = new EventDialog(eventService, this::addEventToCalendar);
+        EventDialog eventDialog = new EventDialog(eventService, userInfoService, this::addEventToCalendar);
         eventDialog.open(selectedDate, null);
     }
 

@@ -3,8 +3,6 @@ package org.example.practica8.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
@@ -22,10 +20,9 @@ public class UserInfo {
     @Column(unique = true)
     private String email;
 
+    private String name;
+
     private String password;
 
     private String role;
-
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
-    private List<Event> events;
 }

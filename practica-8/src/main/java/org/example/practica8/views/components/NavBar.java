@@ -8,10 +8,19 @@ import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.spring.security.AuthenticationContext;
+import org.example.practica8.services.UserInfoService;
+import org.example.practica8.views.user.ChangeUserInfoDialog;
 
 @Tag("nav-bar")
 public class NavBar extends Div {
-    public NavBar() {
+    private final UserInfoService userInfoService;
+    private final AuthenticationContext authenticationContext;
+
+    public NavBar(UserInfoService userInfoService, AuthenticationContext authenticationContext) {
+        this.userInfoService = userInfoService;
+        this.authenticationContext = authenticationContext;
+
         setSizeFull();
         getStyle()
                 .set("color", "var(--lumo-primary-contrast-color)")
@@ -37,10 +46,15 @@ public class NavBar extends Div {
     public MenuBar threeDotsDropdown() {
         ThreeDotsDropdown menu = new ThreeDotsDropdown();
 
-        menu.addDropDownItem("Account settings", VaadinIcon.COG, null, click -> {})
+        menu.addDropDownItem("Account settings", VaadinIcon.COG, null, click -> openAccountSettingsDialog())
                 .addDropDownItem("User management", VaadinIcon.USER, null, click -> {})
-                .addDropDownItem("Log out", VaadinIcon.SIGN_OUT, "var(--lumo-error-text-color)", click -> {});
+                .addDropDownItem("Log out", VaadinIcon.SIGN_OUT, "var(--lumo-error-text-color)", click -> authenticationContext.logout());
 
         return menu;
+    }
+
+    public void openAccountSettingsDialog() {
+        ChangeUserInfoDialog dialog = new ChangeUserInfoDialog(userInfoService, authenticationContext);
+        dialog.open();
     }
 }
