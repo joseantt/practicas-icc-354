@@ -16,5 +16,4 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e FROM Event e WHERE (:start IS NULL OR e.endDate >= :start) AND (:end IS NULL OR e.startDate <= :end)")
     List<Event> findEventsWithinRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-    List<Event> findByUsername(String username);
 }

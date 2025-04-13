@@ -124,7 +124,6 @@ public class EventDialog {
 
         if (currentEvent == null){
             currentEvent = new Event();
-            currentEvent.setUsername("");
         }
 
         if (!binder.writeBeanIfValid(currentEvent)) {

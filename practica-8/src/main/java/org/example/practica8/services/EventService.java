@@ -26,10 +26,6 @@ public class EventService {
         eventRepository.deleteById(id);
     }
 
-    public List<Event> getEventsByUsername(String username) {
-        return eventRepository.findByUsername(username);
-    }
-
     public Event getEventById(Long id) {
         return eventRepository.findById(id).orElse(null);
     }

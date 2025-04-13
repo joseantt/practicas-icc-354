@@ -1,9 +1,6 @@
 package org.example.practica8.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,5 +22,7 @@ public class Event {
     private String description;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
-    private String username;
+
+    @ManyToOne
+    private UserInfo owner;
 }
