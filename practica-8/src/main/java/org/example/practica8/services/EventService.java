@@ -2,7 +2,6 @@ package org.example.practica8.services;
 
 import org.example.practica8.entities.Event;
 import org.example.practica8.entities.UserDetailsImpl;
-import org.example.practica8.entities.UserInfo;
 import org.example.practica8.repositories.EventRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -35,12 +34,14 @@ public class EventService {
     }
 
     public List<Event> getEventsWithinRange(LocalDateTime start, LocalDateTime end) {
+        if(SecurityContextHolder.getContext().getAuthentication() == null) return List.of();
+
         Long ownerId = ((UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUserInfo().getId();
         return eventRepository.findEventsWithinRange(start, end, ownerId);
     }
 
     public Stream<Entry> streamEntries(EntryQuery query) {
-        if(SecurityContextHolder.getContext().getAuthentication().getPrincipal() == null) return Stream.empty();
+        if(SecurityContextHolder.getContext().getAuthentication() == null) return Stream.empty();
 
         Long ownerId = ((UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUserInfo().getId();
         return eventRepository
