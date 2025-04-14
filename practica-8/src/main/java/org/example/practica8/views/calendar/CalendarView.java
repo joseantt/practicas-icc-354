@@ -1,6 +1,14 @@
 package org.example.practica8.views.calendar;
 
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarVariant;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import lombok.NonNull;
 import org.example.practica8.entities.Event;
@@ -11,6 +19,7 @@ import org.vaadin.stefan.fullcalendar.dataprovider.AbstractEntryProvider;
 import org.vaadin.stefan.fullcalendar.dataprovider.EntryQuery;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -20,6 +29,7 @@ public class CalendarView extends VerticalLayout {
     private final transient EventService eventService;
     private final transient UserInfoService userInfoService;
     private final FullCalendar calendar;
+    private MenuItem viewDate;
 
     public CalendarView(EventService eventService, UserInfoService userInfoService) {
         this.eventService = eventService;
@@ -28,9 +38,35 @@ public class CalendarView extends VerticalLayout {
         calendar = FullCalendarBuilder.create().build();
         configureCalendar();
 
+        MenuBar navigationBar = createNavigationBar();
+        navigationBar.getStyle().set("margin", "10px");
+
+        HorizontalLayout navContainer = new HorizontalLayout(navigationBar);
+        navContainer.setWidthFull();
+        navContainer.setJustifyContentMode(JustifyContentMode.CENTER);
+        navContainer.setPadding(false);
+
         setSizeFull();
-        add(calendar);
+        add(navContainer, calendar);
         setFlexGrow(1, calendar);
+    }
+
+    private MenuBar createNavigationBar() {
+        Button datePickerButton;
+        MenuBar dateMenuBar = new MenuBar();
+        dateMenuBar.addThemeVariants(MenuBarVariant.LUMO_SMALL);
+
+        dateMenuBar.addItem(VaadinIcon.ANGLE_LEFT.create(), e -> calendar.previous())
+                .setId("period-previous-button");
+
+        viewDate = dateMenuBar.addItem("Current month");
+
+        dateMenuBar.addItem(VaadinIcon.ANGLE_RIGHT.create(), e -> calendar.next());
+
+        datePickerButton = new Button(VaadinIcon.CALENDAR.create());
+        datePickerButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+
+        return dateMenuBar;
     }
 
     private void configureCalendar() {
@@ -38,10 +74,13 @@ public class CalendarView extends VerticalLayout {
         calendar.setTimeslotsSelectable(true);
         calendar.setLocale(Locale.US);
         calendar.setTimezone(Timezone.getSystem());
+        calendar.setNowIndicatorShown(true);
         calendar.addTimeslotsSelectedListener(this::showCreateEventDialog);
         calendar.addEntryClickedListener(this::showUpdateEventDialog);
         calendar.setPrefetchEnabled(true);
         calendar.setEntryProvider(new BackendEntryProvider(eventService));
+
+        calendar.addDatesRenderedListener(event -> updateIntervalLabel(event.getIntervalStart()));
     }
 
     private void showUpdateEventDialog(EntryClickedEvent entryClickedEvent) {
@@ -62,6 +101,10 @@ public class CalendarView extends VerticalLayout {
         LocalDate selectedDate = slot.getStart().toLocalDate();
         EventDialog eventDialog = new EventDialog(eventService, userInfoService, this::addEventToCalendar);
         eventDialog.open(selectedDate, null);
+    }
+
+    private void updateIntervalLabel(LocalDate date) {
+        viewDate.setText(date.format(DateTimeFormatter.ofPattern("MMMM yyyy").withLocale(Locale.US)));
     }
 
     private static class BackendEntryProvider extends AbstractEntryProvider<Entry> {

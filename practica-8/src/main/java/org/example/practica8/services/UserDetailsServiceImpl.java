@@ -17,7 +17,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         if(userInfoService.count() == 0) {
             UserInfo admin = UserInfo.builder()
-                            .email("joseanttaveras@gmail.com")
+                            .email("admin@admin.com")
                             .password("admin")
                             .role(Role.ADMIN).build();
             userInfoService.save(admin);

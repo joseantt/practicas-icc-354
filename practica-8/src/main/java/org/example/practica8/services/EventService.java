@@ -1,7 +1,10 @@
 package org.example.practica8.services;
 
 import org.example.practica8.entities.Event;
+import org.example.practica8.entities.UserDetailsImpl;
+import org.example.practica8.entities.UserInfo;
 import org.example.practica8.repositories.EventRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.vaadin.stefan.fullcalendar.Entry;
 import org.vaadin.stefan.fullcalendar.dataprovider.EntryQuery;
@@ -32,12 +35,16 @@ public class EventService {
     }
 
     public List<Event> getEventsWithinRange(LocalDateTime start, LocalDateTime end) {
-        return eventRepository.findEventsWithinRange(start, end);
+        Long ownerId = ((UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUserInfo().getId();
+        return eventRepository.findEventsWithinRange(start, end, ownerId);
     }
 
     public Stream<Entry> streamEntries(EntryQuery query) {
+        if(SecurityContextHolder.getContext().getAuthentication().getPrincipal() == null) return Stream.empty();
+
+        Long ownerId = ((UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUserInfo().getId();
         return eventRepository
-                .findEventsWithinRange(query.getStart(), query.getEnd())
+                .findEventsWithinRange(query.getStart(), query.getEnd(), ownerId)
                 .stream().map(this::convertEventToEntry);
     }
 
