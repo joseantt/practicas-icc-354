@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
 
-    @Query("SELECT e FROM Event e WHERE (:start IS NULL OR e.endDate >= :start) AND (:end IS NULL OR e.startDate <= :end)")
-    List<Event> findEventsWithinRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+    @Query("SELECT e FROM Event e WHERE (:start IS NULL OR e.endDate >= :start) AND (:end IS NULL OR e.startDate <= :end) AND e.owner.id = :owner_id")
+    List<Event> findEventsWithinRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end, @Param("owner_id") Long ownerId);
 
 }

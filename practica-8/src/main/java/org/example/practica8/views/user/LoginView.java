@@ -1,4 +1,4 @@
-package org.example.practica8.views.login;
+package org.example.practica8.views.user;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.login.LoginForm;
