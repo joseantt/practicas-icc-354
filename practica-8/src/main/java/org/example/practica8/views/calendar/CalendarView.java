@@ -1,7 +1,5 @@
 package org.example.practica8.views.calendar;
 
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.MenuItem;
@@ -10,10 +8,14 @@ import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 import lombok.NonNull;
 import org.example.practica8.entities.Event;
 import org.example.practica8.services.EventService;
 import org.example.practica8.services.UserInfoService;
+import org.example.practica8.views.MainLayout;
 import org.vaadin.stefan.fullcalendar.*;
 import org.vaadin.stefan.fullcalendar.dataprovider.AbstractEntryProvider;
 import org.vaadin.stefan.fullcalendar.dataprovider.EntryQuery;
@@ -24,7 +26,9 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-@Tag("calendar-view")
+@Route(value = "", layout = MainLayout.class)
+@PageTitle("Calendar | Time Grid")
+@PermitAll
 public class CalendarView extends VerticalLayout {
     private final transient EventService eventService;
     private final transient UserInfoService userInfoService;

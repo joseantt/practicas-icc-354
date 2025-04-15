@@ -20,9 +20,11 @@ public class Event {
 
     private String title;
     private String description;
+    @Setter
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
     @ManyToOne
     private UserInfo owner;
+
 }

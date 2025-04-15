@@ -1,10 +1,12 @@
 package org.example.practica8.services;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 public class ReminderService {
 
@@ -26,9 +28,10 @@ public class ReminderService {
     }
 
     // This method was developed to test the email service
-    @Scheduled(cron = "0 */5 * * * *")
+    @Scheduled(cron = "0 */2 * * * *")
     public void sendEventReminderEveryFiveMinutes(){
-        eventService.getEventsWithinRange(LocalDateTime.now(), LocalDateTime.now().plusMinutes(5))
+        log.info("Sending reminder every 2 minutes");
+        eventService.getEventsWithinRange(LocalDateTime.now(), LocalDateTime.now().plusMinutes(2))
                 .forEach(event -> emailService.sendReminderFormattedEmail(
                         event.getOwner().getEmail(),
                         event
