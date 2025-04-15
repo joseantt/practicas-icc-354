@@ -17,30 +17,28 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.EmailValidator;
-import org.example.practica8.entities.Manager;
-import org.example.practica8.services.ManagerService;
+import org.example.practica8.constants.Role;
+import org.example.practica8.entities.UserInfo;
 import org.example.practica8.services.UserInfoService;
 
 public class ManagerDialog extends Dialog {
 
-    private final Manager manager;
-    private final ManagerService managerService;
+    private final UserInfo user;
     private final UserInfoService userInfoService;
     private final Runnable onSaveCallback;
-    private final Binder<Manager> binder;
+    private final Binder<UserInfo> binder;
 
     private final TextField nameField = new TextField("Name");
     private final EmailField emailField = new EmailField("Email");
     private final PasswordField passwordField = new PasswordField("Password");
     private final PasswordField confirmPasswordField = new PasswordField("Confirm Password");
 
-    public ManagerDialog(Manager manager, ManagerService managerService, Runnable onSaveCallback) {
-        this.manager = manager;
-        this.managerService = managerService;
-        this.userInfoService = null; // Inyectar si es necesario
+    public ManagerDialog(UserInfo user, UserInfoService userInfoService, Runnable onSaveCallback) {
+        this.user = user;
+        this.userInfoService = userInfoService;
         this.onSaveCallback = onSaveCallback;
 
-        binder = new BeanValidationBinder<>(Manager.class);
+        binder = new BeanValidationBinder<>(UserInfo.class);
 
         configureDialog();
         configureForm();
@@ -53,7 +51,7 @@ public class ManagerDialog extends Dialog {
         setCloseOnOutsideClick(false);
         setWidth("500px");
 
-        String title = manager.getId() == null ? "Add Manager" : "Edit Manager";
+        String title = user.getId() == null ? "Add Manager" : "Edit Manager";
         H3 headerText = new H3(title);
         headerText.getStyle().set("margin-top", "0");
 
@@ -87,7 +85,7 @@ public class ManagerDialog extends Dialog {
         Button cancelButton = new Button("Cancel", e -> close());
         cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
-        Button saveButton = new Button("Save", e -> saveManager());
+        Button saveButton = new Button("Save", e -> saveUser());
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         saveButton.setIcon(VaadinIcon.CHECK.create());
 
@@ -103,12 +101,12 @@ public class ManagerDialog extends Dialog {
         nameField.setRequired(true);
         emailField.setRequired(true);
 
-        // Solo requerimos contraseña para nuevos gerentes
-        boolean isNewManager = manager.getId() == null;
-        passwordField.setRequired(isNewManager);
-        confirmPasswordField.setRequired(isNewManager);
+        // Only require password for new users
+        boolean isNewUser = user.getId() == null;
+        passwordField.setRequired(isNewUser);
+        confirmPasswordField.setRequired(isNewUser);
 
-        if (!isNewManager) {
+        if (!isNewUser) {
             passwordField.setHelperText("Leave blank to keep current password");
             confirmPasswordField.setHelperText("Leave blank to keep current password");
         }
@@ -117,16 +115,15 @@ public class ManagerDialog extends Dialog {
     private void configureBindings() {
         binder.forField(nameField)
                 .asRequired("Name is required")
-                .bind(Manager::getName, Manager::setName);
+                .bind(UserInfo::getName, UserInfo::setName);
 
         binder.forField(emailField)
                 .asRequired("Email is required")
                 .withValidator(new EmailValidator("Invalid email address"))
                 .withValidator(this::validateEmailUniqueness, "Email already in use")
-                .bind(Manager::getEmail, Manager::setEmail);
+                .bind(UserInfo::getEmail, UserInfo::setEmail);
 
-        // Para la contraseña, usamos un enfoque diferente ya que no está directamente vinculada
-        // y necesitamos validación personalizada
+        // Password is handled separately in saveUser method
     }
 
     private boolean validateEmailUniqueness(String email) {
@@ -134,47 +131,50 @@ public class ManagerDialog extends Dialog {
             return true;
         }
 
-        // Si estamos editando y el email no ha cambiado, es válido
-        if (manager.getId() != null && email.equalsIgnoreCase(manager.getEmail())) {
+        // If we're editing and the email hasn't changed, it's valid
+        if (user.getId() != null && email.equalsIgnoreCase(user.getEmail())) {
             return true;
         }
 
-        System.out.println("Pase por aqui");
-        // Verificar si el email ya está en uso
-        //return !userInfoService.existsByEmail(email);
-        return true; // Cambiar esto por la lógica real de verificación
+        // Check if email is already in use
+        return !userInfoService.existsByEmail(email);
     }
 
     private void populateForm() {
-        if (manager.getId() != null) {
-            nameField.setValue(manager.getName() != null ? manager.getName() : "");
-            emailField.setValue(manager.getEmail() != null ? manager.getEmail() : "");
+        if (user.getId() != null) {
+            nameField.setValue(user.getName() != null ? user.getName() : "");
+            emailField.setValue(user.getEmail() != null ? user.getEmail() : "");
         }
 
-        binder.readBean(manager);
+        binder.readBean(user);
     }
 
-    private void saveManager() {
-        if (!binder.writeBeanIfValid(manager)) {
+    private void saveUser() {
+        if (!binder.writeBeanIfValid(user)) {
             return;
         }
 
-        // Validación de contraseña
-        if (manager.getId() == null || !passwordField.getValue().isEmpty()) {
+        // Set role to MANAGER for new users
+        if (user.getId() == null) {
+            user.setRole(Role.MANAGER);
+        }
+
+        // Password validation
+        if (user.getId() == null || !passwordField.getValue().isEmpty()) {
             if (!passwordField.getValue().equals(confirmPasswordField.getValue())) {
                 Notification.show("Passwords do not match")
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return;
             }
 
-            manager.setPassword(passwordField.getValue());
+            user.setPassword(passwordField.getValue());
         }
 
         try {
-            managerService.save(manager);
+            userInfoService.save(user);
             onSaveCallback.run();
 
-            String message = manager.getId() == null ?
+            String message = user.getId() == null ?
                     "Manager created successfully" :
                     "Manager updated successfully";
 

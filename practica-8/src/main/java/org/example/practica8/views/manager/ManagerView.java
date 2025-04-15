@@ -19,8 +19,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
 import org.example.practica8.constants.Role;
-import org.example.practica8.entities.Manager;
-import org.example.practica8.services.ManagerService;
+import org.example.practica8.entities.UserInfo;
+import org.example.practica8.services.UserInfoService;
 import org.example.practica8.views.MainLayout;
 import org.example.practica8.views.components.ThreeDotsDropdown;
 import org.springframework.data.domain.PageRequest;
@@ -30,13 +30,13 @@ import org.springframework.data.domain.PageRequest;
 @RolesAllowed(Role.ADMIN)
 public class ManagerView extends VerticalLayout {
 
-    private final ManagerService managerService;
-    private final Grid<Manager> grid = new Grid<>(Manager.class, false);
+    private final UserInfoService userInfoService;
+    private final Grid<UserInfo> grid = new Grid<>(UserInfo.class, false);
     private final TextField searchField = new TextField();
-    private CallbackDataProvider<Manager, Void> dataProvider;
+    private CallbackDataProvider<UserInfo, Void> dataProvider;
 
-    public ManagerView(ManagerService managerService) {
-        this.managerService = managerService;
+    public ManagerView(UserInfoService userInfoService) {
+        this.userInfoService = userInfoService;
         setSizeFull();
         setPadding(true);
 
@@ -71,7 +71,7 @@ public class ManagerView extends VerticalLayout {
         Button addButton = new Button("Add Manager");
         addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addButton.setIcon(VaadinIcon.PLUS.create());
-        addButton.addClickListener(e -> openManagerDialog(new Manager()));
+        addButton.addClickListener(e -> openManagerDialog(new UserInfo()));
 
         HorizontalLayout toolbar = new HorizontalLayout(searchField, addButton);
         toolbar.setWidthFull();
@@ -84,8 +84,9 @@ public class ManagerView extends VerticalLayout {
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
         grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
 
-        grid.addColumn(Manager::getName).setHeader("Name").setAutoWidth(true).setSortable(true);
-        grid.addColumn(Manager::getEmail).setHeader("Email").setAutoWidth(true).setSortable(true);
+        grid.addColumn(UserInfo::getName).setHeader("Name").setAutoWidth(true).setSortable(true);
+        grid.addColumn(UserInfo::getEmail).setHeader("Email").setAutoWidth(true).setSortable(true);
+        grid.addColumn(UserInfo::getRole).setHeader("Role").setAutoWidth(true).setSortable(true);
 
         grid.addComponentColumn(this::createActionButtons)
                 .setHeader("Actions")
@@ -95,17 +96,17 @@ public class ManagerView extends VerticalLayout {
         grid.setItems(dataProvider);
     }
 
-    private HorizontalLayout createActionButtons(Manager manager) {
+    private HorizontalLayout createActionButtons(UserInfo user) {
         Button editButton = new Button(new Icon(VaadinIcon.EDIT));
         editButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
-        editButton.addClickListener(e -> openManagerDialog(manager));
+        editButton.addClickListener(e -> openManagerDialog(user));
 
         ThreeDotsDropdown dropdown = new ThreeDotsDropdown();
         dropdown.addDropDownItem(
                 "Delete",
                 VaadinIcon.TRASH,
                 "var(--lumo-error-text-color)",
-                click -> confirmDelete(manager)
+                click -> confirmDelete(user)
         );
 
         HorizontalLayout actions = new HorizontalLayout(editButton, dropdown);
@@ -113,13 +114,13 @@ public class ManagerView extends VerticalLayout {
         return actions;
     }
 
-    private void confirmDelete(Manager manager) {
+    private void confirmDelete(UserInfo user) {
         ConfirmDialog dialog = new ConfirmDialog(
                 "Confirm Delete",
                 "Are you sure you want to delete this manager? This action cannot be undone.",
                 "Delete",
                 () -> {
-                    managerService.delete(manager);
+                    userInfoService.delete(user);
                     refreshGrid();
                     Notification.show("Manager deleted successfully")
                             .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
@@ -135,13 +136,13 @@ public class ManagerView extends VerticalLayout {
                     int offset = query.getOffset();
                     int limit = query.getLimit();
 
-                    return managerService.findAll(searchTerm, PageRequest.of(offset / limit, limit))
+                    return userInfoService.findAllManagers(searchTerm, PageRequest.of(offset / limit, limit))
                             .stream();
                 },
                 query -> {
                     String searchTerm = searchField.getValue();
 
-                    return (int) managerService.findAll(searchTerm, PageRequest.of(0, 1))
+                    return (int) userInfoService.findAllManagers(searchTerm, PageRequest.of(0, 1))
                             .getTotalElements();
                 }
         );
@@ -151,8 +152,8 @@ public class ManagerView extends VerticalLayout {
         dataProvider.refreshAll();
     }
 
-    private void openManagerDialog(Manager manager) {
-        ManagerDialog dialog = new ManagerDialog(manager, managerService, this::refreshGrid);
+    private void openManagerDialog(UserInfo user) {
+        ManagerDialog dialog = new ManagerDialog(user, userInfoService, this::refreshGrid);
         dialog.open();
     }
 }
