@@ -1,6 +1,7 @@
 package org.example.practica8.views.components;
 
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -47,7 +48,7 @@ public class NavBar extends Div {
         ThreeDotsDropdown menu = new ThreeDotsDropdown();
 
         menu.addDropDownItem("Account settings", VaadinIcon.COG, null, click -> openAccountSettingsDialog())
-                .addDropDownItem("User management", VaadinIcon.USER, null, click -> {})
+                .addDropDownItem("Manager management", VaadinIcon.USER, null, click -> goToManagerManagement())
                 .addDropDownItem("Log out", VaadinIcon.SIGN_OUT, "var(--lumo-error-text-color)", click -> authenticationContext.logout());
 
         return menu;
@@ -56,5 +57,9 @@ public class NavBar extends Div {
     public void openAccountSettingsDialog() {
         ChangeUserInfoDialog dialog = new ChangeUserInfoDialog(userInfoService, authenticationContext);
         dialog.open();
+    }
+
+    public void goToManagerManagement() {
+        UI.getCurrent().navigate("managers");
     }
 }
